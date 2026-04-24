@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(30), nullable=False, default="solicitante")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -41,8 +41,8 @@ class Ticket(db.Model):
     station = db.Column(db.String(80))
     created_by = db.Column(db.Integer, db.ForeignKey("user.id"))
     assigned_to = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now)
     closed_at = db.Column(db.DateTime, nullable=True)
 
 
