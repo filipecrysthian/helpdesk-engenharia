@@ -13,7 +13,7 @@
     </a>
 </div>
 
-<!-- CARDS RESUMO -->
+<!-- RESUMO -->
 <div class="row mb-4">
 
     <div class="col-md-3">
@@ -128,7 +128,8 @@
 
                 {% for ticket in tickets %}
 
-                <tr>
+                <tr data-created="{{ ticket.created_at.isoformat() }}"
+                    data-closed="{{ 'true' if ticket.closed_at else 'false' }}">
 
                     <td>#{{ ticket.id }}</td>
 
@@ -205,7 +206,7 @@
     </div>
 </div>
 
-<!-- SCRIPT FILTRO -->
+<!-- FILTROS -->
 <script>
 
     const searchInput = document.getElementById("searchInput");
@@ -248,7 +249,7 @@
 
 </script>
 
-<!-- SCRIPT CONTADOR -->
+<!-- CONTADOR + ALERTA -->
 <script>
 
     function updateElapsedTimes() {
@@ -256,6 +257,8 @@
         const elements = document.querySelectorAll(".elapsed-time");
 
         elements.forEach(element => {
+
+            const row = element.closest("tr");
 
             const createdAt = new Date(element.dataset.created);
             const now = new Date();
@@ -269,6 +272,13 @@
             const seconds = String(diff % 60).padStart(2, "0");
 
             element.textContent = `${hours}:${minutes}:${seconds}`;
+
+            if (diff > 2700) {
+                row.classList.add("ticket-overdue");
+            } else {
+                row.classList.remove("ticket-overdue");
+            }
+
         });
     }
 

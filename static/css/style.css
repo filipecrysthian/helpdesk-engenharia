@@ -9,3 +9,7 @@ body {
 .table {
     background-color: white;
 }
+
+.ticket-overdue td {
+    background-color: #f8d7da !important;
+}
