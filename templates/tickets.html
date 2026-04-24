@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Chamados</h2>
+        <small class="text-muted">Gerenciamento de tickets de engenharia</small>
+    </div>
+
+    <a href="{{ url_for('ticket_new') }}" class="btn btn-success">
+        + Novo Chamado
+    </a>
+</div>
+
+<!-- RESUMO -->
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+            <div class="card-body">
+                <h6>Total</h6>
+                <h2>{{ tickets|length }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-warning text-dark">
+            <div class="card-body">
+                <h6>Abertos</h6>
+                <h2>
+                    {{ tickets | selectattr("status", "equalto", "Aberto") | list | length }}
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-info text-white">
+            <div class="card-body">
+                <h6>Em Atendimento</h6>
+                <h2>
+                    {{ tickets | selectattr("status", "equalto", "Em atendimento") | list | length }}
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-success text-white">
+            <div class="card-body">
+                <h6>Fechados</h6>
+                <h2>
+                    {{ tickets | selectattr("status", "equalto", "Fechado") | list | length }}
+                </h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- FILTROS -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control"
+                    placeholder="Buscar título, modelo ou linha...">
+            </div>
+
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="">Todos Status</option>
+                    <option>Aberto</option>
+                    <option>Em atendimento</option>
+                    <option>Fechado</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select id="priorityFilter" class="form-select">
+                    <option value="">Todas Prioridades</option>
+                    <option>Baixa</option>
+                    <option>Média</option>
+                    <option>Alta</option>
+                    <option>Crítica</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button onclick="clearFilters()" class="btn btn-secondary w-100">
+                    Limpar
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- TABELA -->
+<div class="card shadow-sm">
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0" id="ticketTable">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Área</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Modelo</th>
+                    <th>Linha</th>
+                    <th>Data</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for ticket in tickets %}
+
+                <tr>
+
+                    <td>#{{ ticket.id }}</td>
+
+                    <td>{{ ticket.title }}</td>
+
+                    <td>{{ ticket.category }}</td>
+
+                    <td>
+                        {% if ticket.priority == 'Crítica' %}
+                        <span class="badge bg-danger">Crítica</span>
+                        {% elif ticket.priority == 'Alta' %}
+                        <span class="badge bg-warning text-dark">Alta</span>
+                        {% elif ticket.priority == 'Média' %}
+                        <span class="badge bg-primary">Média</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Baixa</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if ticket.status == 'Aberto' %}
+                        <span class="badge bg-warning text-dark">Aberto</span>
+                        {% elif ticket.status == 'Em atendimento' %}
+                        <span class="badge bg-info">Em atendimento</span>
+                        {% else %}
+                        <span class="badge bg-success">Fechado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ ticket.model }}</td>
+
+                    <td>{{ ticket.station }}</td>
+
+                    <td>{{ ticket.created_at.strftime('%d/%m/%Y') }}</td>
+
+                    <td>
+                        <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
+                            Abrir
+                        </a>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+<script>
+
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const priorityFilter = document.getElementById("priorityFilter");
+
+    searchInput.addEventListener("keyup", filterTable);
+    statusFilter.addEventListener("change", filterTable);
+    priorityFilter.addEventListener("change", filterTable);
+
+    function filterTable() {
+
+        let search = searchInput.value.toLowerCase();
+        let status = statusFilter.value.toLowerCase();
+        let priority = priorityFilter.value.toLowerCase();
+
+        let rows = document.querySelectorAll("#ticketTable tbody tr");
+
+        rows.forEach(row => {
+
+            let text = row.innerText.toLowerCase();
+
+            let matchSearch = text.includes(search);
+            let matchStatus = status === "" || text.includes(status);
+            let matchPriority = priority === "" || text.includes(priority);
+
+            row.style.display = (matchSearch && matchStatus && matchPriority)
+                ? ""
+                : "none";
+
+        });
+    }
+
+    function clearFilters() {
+        searchInput.value = "";
+        statusFilter.value = "";
+        priorityFilter.value = "";
+        filterTable();
+    }
+
+</script>
+
+{% endblock %}

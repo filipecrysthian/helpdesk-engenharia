@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Dashboard</h3>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-bg-primary shadow">
+            <div class="card-body">
+                <h5>Total</h5>
+                <h2>{{ total_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-warning shadow">
+            <div class="card-body">
+                <h5>Abertos</h5>
+                <h2>{{ open_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-info shadow">
+            <div class="card-body">
+                <h5>Em atendimento</h5>
+                <h2>{{ progress_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-bg-success shadow">
+            <div class="card-body">
+                <h5>Fechados</h5>
+                <h2>{{ closed_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('ticket_new') }}" class="btn btn-success">Novo Chamado</a>
+    <a href="{{ url_for('tickets') }}" class="btn btn-secondary">Ver Chamados</a>
+</div>
+
+{% endblock %}
