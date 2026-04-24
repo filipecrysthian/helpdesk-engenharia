@@ -12,6 +12,24 @@
     </div>
 
     <div class="mb-3">
+        <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
+
+        <input type="text" id="defectSearch" class="form-control mb-2"
+            placeholder="Pesquisar defeito/problema... Ex: HDMI, FEEDER, TST002">
+
+        <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
+            <option value="">Selecione uma categoria de defeito</option>
+
+            {% for defect in defect_categories %}
+            <option value="{{ defect.id }}" data-area="{{ defect.area }}"
+                data-search="{{ defect.code }} {{ defect.description }} {{ defect.area }}">
+                {{ defect.code }} - {{ defect.description }} | {{ defect.area }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
         <label class="form-label">Descrição</label>
         <textarea name="description" class="form-control" rows="5"></textarea>
     </div>
@@ -73,5 +91,25 @@
     <a href="{{ url_for('tickets') }}" class="btn btn-danger">Cancelar</a>
 
 </form>
+
+<script>
+    const defectSearch = document.getElementById("defectSearch");
+    const defectSelect = document.getElementById("defectCategorySelect");
+    const originalOptions = Array.from(defectSelect.options);
+
+    defectSearch.addEventListener("keyup", function () {
+        const search = defectSearch.value.toLowerCase();
+
+        defectSelect.innerHTML = "";
+
+        originalOptions.forEach(option => {
+            const text = option.dataset.search ? option.dataset.search.toLowerCase() : option.text.toLowerCase();
+
+            if (option.value === "" || text.includes(search)) {
+                defectSelect.appendChild(option);
+            }
+        });
+    });
+</script>
 
 {% endblock %}

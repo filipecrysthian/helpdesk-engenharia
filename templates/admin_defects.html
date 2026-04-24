@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Cadastro de Categorias de Defeito</h3>
+<small class="text-muted">Área administrativa para cadastrar defeitos/problemas padronizados</small>
+
+<div class="card shadow-sm mt-4 mb-4">
+    <div class="card-body">
+
+        <form method="POST">
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Código</label>
+                    <input type="text" name="code" class="form-control" placeholder="Ex: TST003" required>
+                </div>
+
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="description" class="form-control" placeholder="Ex: FALHA NO TESTE DE USB"
+                        required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Área Engenharia</label>
+                    <select name="area" class="form-select" required>
+                        <option value="">Selecione</option>
+                        <option>Engenharia de Teste</option>
+                        <option>Engenharia SMT</option>
+                        <option>Engenharia de Processo</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Cadastrar Defeito
+            </button>
+
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                Voltar
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Área</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for defect in defects %}
+                <tr>
+                    <td><strong>{{ defect.code }}</strong></td>
+                    <td>{{ defect.description }}</td>
+                    <td>{{ defect.area }}</td>
+                    <td>
+                        {% if defect.active %}
+                        <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inativo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">
+                        Nenhum defeito cadastrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

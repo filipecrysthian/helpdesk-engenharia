@@ -29,6 +29,13 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class DefectCategory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+    area = db.Column(db.String(80), nullable=False)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,6 +51,8 @@ class Ticket(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
     closed_at = db.Column(db.DateTime, nullable=True)
+    defect_category_id = db.Column(db.Integer, db.ForeignKey("defect_category.id"), nullable=True)
+    defect_category = db.relationship("DefectCategory")
 
 
 @login_manager.user_loader
@@ -124,11 +133,14 @@ def tickets():
 @app.route("/tickets/new", methods=["GET", "POST"])
 @login_required
 def ticket_new():
+    defect_categories = DefectCategory.query.filter_by(active=True).order_by(DefectCategory.code.asc()).all()
+
     if request.method == "POST":
         ticket = Ticket(
             title=request.form.get("title"),
             description=request.form.get("description"),
             category=request.form.get("category"),
+            defect_category_id=request.form.get("defect_category_id"),
             priority=request.form.get("priority"),
             model=request.form.get("model"),
             station=request.form.get("station"),
@@ -141,7 +153,34 @@ def ticket_new():
         flash("Chamado criado com sucesso!", "success")
         return redirect(url_for("tickets"))
 
-    return render_template("ticket_new.html")
+    return render_template("ticket_new.html", defect_categories=defect_categories)
+
+def create_default_defect_categories():
+    default_defects = [
+        ("TST001", "PLACA PCI MB NÃO LIGA", "Engenharia de Teste"),
+        ("TST002", "PLACA SEM VÍDEO NO LCD", "Engenharia de Teste"),
+        ("TST002A", "PLACA SEM VÍDEO NO HDMI", "Engenharia de Teste"),
+
+        ("SMT001", "NXT PARADA", "Engenharia SMT"),
+        ("SMT002", "FEEDER COM DEFEITO", "Engenharia SMT"),
+        ("SMT002A", "FEEDER TRAVADO", "Engenharia SMT"),
+
+        ("PRC001", "FALHA DE IMPRESSÃO", "Engenharia de Processo"),
+        ("PRC002", "TIRAR TEMPO DA ESTEIRA", "Engenharia de Processo"),
+        ("PRC002A", "AJUSTAR VELOCIDADE DA ESTEIRA", "Engenharia de Processo"),
+    ]
+
+    for code, description, area in default_defects:
+        exists = DefectCategory.query.filter_by(code=code).first()
+        if not exists:
+            defect = DefectCategory(
+                code=code,
+                description=description,
+                area=area
+            )
+            db.session.add(defect)
+
+    db.session.commit()
 
 
 @app.route("/tickets/<int:ticket_id>")
@@ -150,10 +189,43 @@ def ticket_detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template("ticket_detail.html", ticket=ticket)
 
+@app.route("/admin/defects", methods=["GET", "POST"])
+@login_required
+def admin_defects():
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        code = request.form.get("code").strip().upper()
+        description = request.form.get("description").strip().upper()
+        area = request.form.get("area")
+
+        exists = DefectCategory.query.filter_by(code=code).first()
+
+        if exists:
+            flash("Já existe uma categoria com esse código.", "danger")
+        else:
+            defect = DefectCategory(
+                code=code,
+                description=description,
+                area=area
+            )
+            db.session.add(defect)
+            db.session.commit()
+            flash("Categoria de defeito cadastrada com sucesso!", "success")
+
+        return redirect(url_for("admin_defects"))
+
+    defects = DefectCategory.query.order_by(DefectCategory.area.asc(), DefectCategory.code.asc()).all()
+
+    return render_template("admin_defects.html", defects=defects)
+
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         create_admin_user()
+        create_default_defect_categories()
 
     app.run(debug=True)
