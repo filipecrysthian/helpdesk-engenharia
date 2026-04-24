@@ -43,6 +43,7 @@ class Ticket(db.Model):
     assigned_to = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    closed_at = db.Column(db.DateTime, nullable=True)
 
 
 @login_manager.user_loader
@@ -116,11 +117,7 @@ def dashboard():
 @app.route("/tickets")
 @login_required
 def tickets():
-    all_tickets = Ticket.query.order_by(
-    Ticket.status.asc(),
-    Ticket.priority.desc(),
-    Ticket.created_at.asc()
-    ).all()
+    all_tickets = Ticket.query.order_by(Ticket.created_at.asc()).all()
     return render_template("tickets.html", tickets=all_tickets)
 
 

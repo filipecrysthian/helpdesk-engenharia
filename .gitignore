@@ -7,3 +7,4 @@ instance/helpdesk.db
 .vscode/
 .idea/
 *.log
+commit.py

@@ -13,7 +13,7 @@
     </a>
 </div>
 
-<!-- RESUMO -->
+<!-- CARDS RESUMO -->
 <div class="row mb-4">
 
     <div class="col-md-3">
@@ -117,7 +117,10 @@
                     <th>Modelo</th>
                     <th>Linha</th>
                     <th>Data</th>
-                    <th></th>
+                    <th>Hora Abertura</th>
+                    <th>Hora Fechamento</th>
+                    <th>Tempo Aberto</th>
+                    <th>Ação</th>
                 </tr>
             </thead>
 
@@ -136,10 +139,13 @@
                     <td>
                         {% if ticket.priority == 'Crítica' %}
                         <span class="badge bg-danger">Crítica</span>
+
                         {% elif ticket.priority == 'Alta' %}
                         <span class="badge bg-warning text-dark">Alta</span>
+
                         {% elif ticket.priority == 'Média' %}
                         <span class="badge bg-primary">Média</span>
+
                         {% else %}
                         <span class="badge bg-secondary">Baixa</span>
                         {% endif %}
@@ -148,8 +154,10 @@
                     <td>
                         {% if ticket.status == 'Aberto' %}
                         <span class="badge bg-warning text-dark">Aberto</span>
+
                         {% elif ticket.status == 'Em atendimento' %}
                         <span class="badge bg-info">Em atendimento</span>
+
                         {% else %}
                         <span class="badge bg-success">Fechado</span>
                         {% endif %}
@@ -160,6 +168,26 @@
                     <td>{{ ticket.station }}</td>
 
                     <td>{{ ticket.created_at.strftime('%d/%m/%Y') }}</td>
+
+                    <td>{{ ticket.created_at.strftime('%H:%M:%S') }}</td>
+
+                    <td>
+                        {% if ticket.closed_at %}
+                        {{ ticket.closed_at.strftime('%H:%M:%S') }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if ticket.closed_at %}
+                        <span class="badge bg-success">Finalizado</span>
+                        {% else %}
+                        <span class="elapsed-time" data-created="{{ ticket.created_at.isoformat() }}">
+                            00:00:00
+                        </span>
+                        {% endif %}
+                    </td>
 
                     <td>
                         <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
@@ -177,6 +205,7 @@
     </div>
 </div>
 
+<!-- SCRIPT FILTRO -->
 <script>
 
     const searchInput = document.getElementById("searchInput");
@@ -203,10 +232,10 @@
             let matchStatus = status === "" || text.includes(status);
             let matchPriority = priority === "" || text.includes(priority);
 
-            row.style.display = (matchSearch && matchStatus && matchPriority)
-                ? ""
-                : "none";
-
+            row.style.display =
+                (matchSearch && matchStatus && matchPriority)
+                    ? ""
+                    : "none";
         });
     }
 
@@ -216,6 +245,35 @@
         priorityFilter.value = "";
         filterTable();
     }
+
+</script>
+
+<!-- SCRIPT CONTADOR -->
+<script>
+
+    function updateElapsedTimes() {
+
+        const elements = document.querySelectorAll(".elapsed-time");
+
+        elements.forEach(element => {
+
+            const createdAt = new Date(element.dataset.created);
+            const now = new Date();
+
+            let diff = Math.floor((now - createdAt) / 1000);
+
+            if (diff < 0) diff = 0;
+
+            const hours = String(Math.floor(diff / 3600)).padStart(2, "0");
+            const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+            const seconds = String(diff % 60).padStart(2, "0");
+
+            element.textContent = `${hours}:${minutes}:${seconds}`;
+        });
+    }
+
+    setInterval(updateElapsedTimes, 1000);
+    updateElapsedTimes();
 
 </script>
 
