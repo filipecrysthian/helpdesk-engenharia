@@ -2,19 +2,26 @@
 
 {% block content %}
 
-<h3>Chamado #{{ ticket.id }}</h3>
+<div class="card shadow-sm">
 
-<div class="card mt-4">
     <div class="card-header bg-dark text-white">
-        {{ ticket.title }}
+        <h3 class="mb-0">#{{ ticket.id }} - {{ ticket.title }}</h3>
     </div>
 
     <div class="card-body">
 
-        <p><strong>Descrição:</strong></p>
-        <p>{{ ticket.description }}</p>
+        <h5>Descrição:</h5>
+        <p>{{ ticket.description if ticket.description else "-" }}</p>
 
         <hr>
+
+        <p><strong>Usuário:</strong>
+            {% if creator %}
+            {{ creator.first_name }} {{ creator.last_name }}
+            {% else %}
+            -
+            {% endif %}
+        </p>
 
         <p>
             <strong>Categoria Defeito:</strong>
@@ -27,25 +34,91 @@
 
         <p><strong>Área Engenharia:</strong> {{ ticket.category }}</p>
         <p><strong>Prioridade:</strong> {{ ticket.priority }}</p>
-        <p><strong>Status:</strong> {{ ticket.status }}</p>
+
+        <p>
+            <strong>Status:</strong>
+            {% if ticket.status == "Aberto" %}
+            <span class="badge bg-warning text-dark">Aberto</span>
+            {% else %}
+            <span class="badge bg-success">Fechado</span>
+            {% endif %}
+        </p>
+
         <p><strong>Linha:</strong> {{ ticket.station }}</p>
         <p><strong>Data de abertura:</strong> {{ ticket.created_at.strftime('%d/%m/%Y') }}</p>
         <p><strong>Hora de abertura:</strong> {{ ticket.created_at.strftime('%H:%M:%S') }}</p>
 
-        <p>
-            <strong>Hora de fechamento:</strong>
-            {% if ticket.closed_at %}
-            {{ ticket.closed_at.strftime('%H:%M:%S') }}
-            {% else %}
-            -
-            {% endif %}
-        </p>
+        {% if ticket.solution %}
+        <hr>
+        <h5>Solução:</h5>
+        <p>{{ ticket.solution }}</p>
+        {% endif %}
 
     </div>
 </div>
 
 <div class="mt-3">
     <a href="{{ url_for('tickets') }}" class="btn btn-secondary">Voltar</a>
+
+    {% if ticket.status == "Aberto" %}
+    <button class="btn btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#solutionBox">
+        Solução
+    </button>
+    {% endif %}
+</div>
+
+{% if ticket.status == "Aberto" %}
+<div class="collapse mt-3" id="solutionBox">
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            Fechar chamado
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Descreva a solução aplicada</label>
+                    <textarea name="solution" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Fechar Chamado
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-dark text-white">
+        Histórico
+    </div>
+
+    <div class="card-body">
+
+        {% if histories %}
+        <ul class="list-group">
+            {% for item in histories %}
+            <li class="list-group-item">
+                <strong>{{ item.action }}</strong><br>
+                Status: {{ item.old_status }} → {{ item.new_status }}<br>
+                Alterado por:
+                {% if item.user %}
+                {{ item.user.first_name }} {{ item.user.last_name }}
+                {% else %}
+                -
+                {% endif %}
+                <br>
+                Data/Hora: {{ item.created_at.strftime('%d/%m/%Y %H:%M:%S') }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted mb-0">Nenhuma alteração registrada.</p>
+        {% endif %}
+
+    </div>
 </div>
 
 {% endblock %}

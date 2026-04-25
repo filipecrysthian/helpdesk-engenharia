@@ -69,7 +69,6 @@
                 <select id="statusFilter" class="form-select">
                     <option value="">Todos Status</option>
                     <option>Aberto</option>
-                    <option>Em atendimento</option>
                     <option>Fechado</option>
                 </select>
             </div>
@@ -154,8 +153,6 @@
                     <td>
                         {% if ticket.status == 'Aberto' %}
                         <span class="badge bg-warning text-dark">Aberto</span>
-                        {% elif ticket.status == 'Em atendimento' %}
-                        <span class="badge bg-info">Em atendimento</span>
                         {% else %}
                         <span class="badge bg-success">Fechado</span>
                         {% endif %}
@@ -177,7 +174,13 @@
 
                     <td>
                         {% if ticket.closed_at %}
-                        <span class="badge bg-success">Finalizado</span>
+                        {% set diff = ticket.closed_at - ticket.created_at %}
+                        {% set total_seconds = diff.total_seconds() | int %}
+                        {% set hours = total_seconds // 3600 %}
+                        {% set minutes = (total_seconds % 3600) // 60 %}
+                        {% set seconds = total_seconds % 60 %}
+
+                        {{ "%02d:%02d:%02d"|format(hours, minutes, seconds) }}
                         {% else %}
                         <span class="elapsed-time" data-created="{{ ticket.created_at.isoformat() }}">
                             00:00:00

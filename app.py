@@ -70,6 +70,20 @@ class Ticket(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
     closed_at = db.Column(db.DateTime, nullable=True)
+    solution = db.Column(db.Text, nullable=True)
+
+
+class TicketHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey("ticket.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    old_status = db.Column(db.String(30), nullable=True)
+    new_status = db.Column(db.String(30), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+    ticket = db.relationship("Ticket", backref="history")
+    user = db.relationship("User")
 
 
 @login_manager.user_loader
@@ -252,11 +266,49 @@ def ticket_new():
     return render_template("ticket_new.html", defect_categories=defect_categories)
 
 
-@app.route("/tickets/<int:ticket_id>")
+@app.route("/tickets/<int:ticket_id>", methods=["GET", "POST"])
 @login_required
 def ticket_detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
-    return render_template("ticket_detail.html", ticket=ticket)
+
+    creator = User.query.get(ticket.created_by)
+
+    if request.method == "POST":
+        solution = request.form.get("solution")
+
+        if not solution or not solution.strip():
+            flash("Informe a solução antes de fechar o chamado.", "danger")
+            return redirect(url_for("ticket_detail", ticket_id=ticket.id))
+
+        old_status = ticket.status
+
+        ticket.status = "Fechado"
+        ticket.solution = solution.strip()
+        ticket.closed_at = datetime.now()
+        ticket.updated_at = datetime.now()
+
+        history = TicketHistory(
+            ticket_id=ticket.id,
+            user_id=current_user.id,
+            old_status=old_status,
+            new_status="Fechado",
+            action="Chamado fechado"
+        )
+
+        db.session.add(history)
+        db.session.commit()
+
+        flash("Chamado fechado com sucesso!", "success")
+        return redirect(url_for("ticket_detail", ticket_id=ticket.id))
+
+    histories = TicketHistory.query.filter_by(ticket_id=ticket.id).order_by(TicketHistory.created_at.desc()).all()
+
+    return render_template(
+        "ticket_detail.html",
+        ticket=ticket,
+        creator=creator,
+        histories=histories
+    )
 
 
 @app.route("/admin/defects", methods=["GET", "POST"])
