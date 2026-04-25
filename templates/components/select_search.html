@@ -1,0 +1,25 @@
+{% macro searchable_select(name, id, label, options, required=False, placeholder="Selecione") %}
+
+<div class="mb-3">
+    <label class="form-label">
+        {{ label }}
+        {% if required %}
+        <span class="text-danger">*</span>
+        {% endif %}
+    </label>
+
+    <select name="{{ name }}" id="{{ id }}" class="form-select searchable-select" data-placeholder="{{ placeholder }}"
+        {% if required %}required{% endif %}>
+
+        <option value=""></option>
+
+        {% for option in options %}
+        <option value="{{ option.value }}">
+            {{ option.text }}
+        </option>
+        {% endfor %}
+
+    </select>
+</div>
+
+{% endmacro %}

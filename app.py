@@ -274,16 +274,20 @@ def ticket_detail(ticket_id):
     creator = User.query.get(ticket.created_by)
 
     if request.method == "POST":
-        solution = request.form.get("solution")
+        solution_category = request.form.get("solution_category")
+        solution_text = request.form.get("solution", "").strip()
 
-        if not solution or not solution.strip():
-            flash("Informe a solução antes de fechar o chamado.", "danger")
+        if not solution_category:
+            flash("Selecione a categoria da solução.", "danger")
             return redirect(url_for("ticket_detail", ticket_id=ticket.id))
 
         old_status = ticket.status
 
         ticket.status = "Fechado"
-        ticket.solution = solution.strip()
+        if solution_text:
+            ticket.solution = f"{solution_category} - {solution_text}"
+        else:
+            ticket.solution = solution_category
         ticket.closed_at = datetime.now()
         ticket.updated_at = datetime.now()
 

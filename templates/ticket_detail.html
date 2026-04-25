@@ -69,24 +69,56 @@
 
 {% if ticket.status == "Aberto" %}
 <div class="collapse mt-3" id="solutionBox">
+
     <div class="card shadow-sm">
+
         <div class="card-header bg-success text-white">
             Fechar chamado
         </div>
 
         <div class="card-body">
+
             <form method="POST">
+
+                <!-- CATEGORIA -->
                 <div class="mb-3">
-                    <label class="form-label">Descreva a solução aplicada</label>
-                    <textarea name="solution" class="form-control" rows="5" required></textarea>
+                    <label class="form-label">
+                        Categoria <span class="text-danger">*</span>
+                    </label>
+
+                    <select name="solution_category" id="solutionCategory" class="form-select searchable-select"
+                        data-placeholder="Selecione" required>
+
+                        <option value=""></option>
+                        <option>TROCA DO CABO</option>
+                        <option>TROCA DO SWITCH DE VÍDEO</option>
+                        <option>CONFIGURAÇÃO DO SCRIPT DE TESTE</option>
+                        <option>FALSA FALHA</option>
+                        <option>FALHA REAL</option>
+                        <option>OUTROS</option>
+
+                    </select>
+                </div>
+
+                <!-- DESCRIÇÃO -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        Descreva a solução aplicada
+                    </label>
+
+                    <textarea name="solution" class="form-control" rows="5"></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-success">
                     Fechar Chamado
                 </button>
+
             </form>
+
         </div>
+
     </div>
+
 </div>
 {% endif %}
 

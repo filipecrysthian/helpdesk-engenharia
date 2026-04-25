@@ -77,6 +77,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <script>
+        $(document).ready(function () {
+            $('.searchable-select').each(function () {
+                const placeholderText = $(this).data('placeholder') || 'Selecione';
+
+                $(this).select2({
+                    placeholder: placeholderText,
+                    allowClear: true,
+                    width: '100%',
+                    language: {
+                        noResults: function () {
+                            return "Nenhum resultado encontrado";
+                        },
+                        searching: function () {
+                            return "Buscando...";
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
     {% block scripts %}{% endblock %}
 
 </body>
