@@ -165,7 +165,7 @@ def create_default_solution_categories():
 @app.route("/")
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("tickets"))
     return redirect(url_for("login"))
 
 
@@ -187,7 +187,7 @@ def login():
 
         if user.check_password(password):
             login_user(user)
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("tickets"))
 
         flash("Email ou senha inválidos.", "danger")
 
