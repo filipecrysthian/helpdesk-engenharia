@@ -12,96 +12,91 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
-
-        <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
-
-            <option value="">Selecione...</option>
-
-            {% for defect in defect_categories %}
-            <option value="{{ defect.id }}">
-                {{ defect.code }} - {{ defect.description }} | {{ defect.area }}
-            </option>
-            {% endfor %}
-
-        </select>
-    </div>
-
-    <div class="mb-3">
         <label class="form-label">Descrição</label>
         <textarea name="description" class="form-control" rows="5"></textarea>
     </div>
 
     <div class="row">
 
-        <div class="col-md-4 mb-3">
-            <label class="form-label">Área Engenharia</label>
-
-            <select name="category" class="form-select" required>
-
-                <option value="">Selecione</option>
-                <option>Engenharia de Teste</option>
-                <option>Engenharia SMT</option>
-                <option>Engenharia de Processo</option>
-
-            </select>
-        </div>
-
-        <div class="col-md-4 mb-3">
-            <label class="form-label">Prioridade</label>
-
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Prioridade <span class="text-danger">*</span></label>
             <select name="priority" class="form-select" required>
-
                 <option>Baixa</option>
                 <option selected>Média</option>
                 <option>Alta</option>
                 <option>Crítica</option>
-
             </select>
         </div>
 
-        <div class="col-md-4 mb-3">
-            <label class="form-label">Linha</label>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Área Engenharia <span class="text-danger">*</span></label>
+            <select name="category" id="areaSelect" class="form-select" required>
+                <option value="">Selecione</option>
+                <option value="Engenharia de Teste">Engenharia de Teste</option>
+                <option value="Engenharia SMT">Engenharia SMT</option>
+                <option value="Engenharia de Processo">Engenharia de Processo</option>
+            </select>
+        </div>
 
-            <select name="station" class="form-select" required>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
+            <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
+                <option value="">Selecione...</option>
 
+                {% for defect in defect_categories %}
+                <option value="{{ defect.id }}" data-area="{{ defect.area }}">
+                    {{ defect.code }} - {{ defect.description }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Linha <span class="text-danger">*</span></label>
+            <select name="station" id="lineSelect" class="form-select" required>
                 <option value="">Selecione</option>
 
-                <option>SMT5</option>
-                <option>SMT12</option>
-                <option>SMT14</option>
-                <option>SMT16</option>
-                <option>SMT18</option>
+                <option value="SMT5" data-type="SMT">SMT5</option>
+                <option value="SMT12" data-type="SMT">SMT12</option>
+                <option value="SMT14" data-type="SMT">SMT14</option>
+                <option value="SMT16" data-type="SMT">SMT16</option>
+                <option value="SMT18" data-type="SMT">SMT18</option>
 
-                <option>IMC2</option>
-                <option>IMC4</option>
-                <option>IMC6</option>
-                <option>IMC8</option>
-                <option>IMC10</option>
-                <option>IMC12</option>
-                <option>IMC14</option>
-
+                <option value="IMC2" data-type="IMC">IMC2</option>
+                <option value="IMC4" data-type="IMC">IMC4</option>
+                <option value="IMC6" data-type="IMC">IMC6</option>
+                <option value="IMC8" data-type="IMC">IMC8</option>
+                <option value="IMC10" data-type="IMC">IMC10</option>
+                <option value="IMC12" data-type="IMC">IMC12</option>
+                <option value="IMC14" data-type="IMC">IMC14</option>
             </select>
         </div>
 
     </div>
 
-    <button type="submit" class="btn btn-success">
-        Salvar Chamado
-    </button>
-
-    <a href="{{ url_for('tickets') }}" class="btn btn-danger">
-        Cancelar
-    </a>
+    <button type="submit" class="btn btn-success">Salvar Chamado</button>
+    <a href="{{ url_for('tickets') }}" class="btn btn-danger">Cancelar</a>
 
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+
 <script>
     $(document).ready(function () {
-        $('#defectCategorySelect').select2({
-            placeholder: "Pesquisar defeito/problema...",
+
+        const areaSelect = $("#areaSelect");
+        const defectSelect = $("#defectCategorySelect");
+        const lineSelect = $("#lineSelect");
+
+        const allDefectOptions = defectSelect.find("option").clone();
+        const allLineOptions = lineSelect.find("option").clone();
+
+        defectSelect.select2({
+            placeholder: "Selecione",
             allowClear: true,
-            width: '100%',
+            width: "100%",
             language: {
                 noResults: function () {
                     return "Nenhum resultado encontrado";
@@ -111,6 +106,62 @@
                 }
             }
         });
+
+        function updateDefectsByArea(selectedArea) {
+            defectSelect.empty();
+
+            allDefectOptions.each(function () {
+                const option = $(this);
+                const optionArea = option.attr("data-area");
+
+                if (option.val() === "") {
+                    defectSelect.append(option.clone());
+                }
+
+                if (optionArea === selectedArea) {
+                    defectSelect.append(option.clone());
+                }
+            });
+
+            defectSelect.val("").trigger("change");
+        }
+
+        function updateLinesByArea(selectedArea) {
+            lineSelect.empty();
+
+            allLineOptions.each(function () {
+                const option = $(this);
+                const lineType = option.attr("data-type");
+
+                if (option.val() === "") {
+                    lineSelect.append(option.clone());
+                }
+
+                if (selectedArea === "Engenharia de Teste" && lineType === "IMC") {
+                    lineSelect.append(option.clone());
+                }
+
+                if (selectedArea === "Engenharia SMT" && lineType === "SMT") {
+                    lineSelect.append(option.clone());
+                }
+
+                if (selectedArea === "Engenharia de Processo" && option.val() !== "") {
+                    lineSelect.append(option.clone());
+                }
+            });
+
+            lineSelect.val("");
+        }
+
+        areaSelect.on("change", function () {
+            const selectedArea = $(this).val();
+
+            updateDefectsByArea(selectedArea);
+            updateLinesByArea(selectedArea);
+        });
+
+        updateDefectsByArea("");
+        updateLinesByArea("");
     });
 </script>
 
