@@ -13,3 +13,53 @@ body {
 .ticket-overdue td {
     background-color: #f8d7da !important;
 }
+
+/* Ajuste visual Select2 - Categoria Defeito */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #212529 !important;
+    line-height: 38px !important;
+    padding-left: 12px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
+    right: 8px !important;
+}
+
+.select2-dropdown {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 6px !important;
+}
+
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 5px !important;
+    padding: 8px !important;
+    outline: none !important;
+}
+
+.select2-results__option {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0d6efd !important;
+    color: white !important;
+}

@@ -2,113 +2,151 @@
 
 {% block content %}
 
-<h3>Novo Chamado</h3>
+<h2 class="mb-4">Novo Chamado</h2>
 
-<form method="POST" class="mt-4">
+<form method="POST">
 
+    <!-- TITULO -->
     <div class="mb-3">
-        <label class="form-label">Título <span class="text-danger">*</span></label>
+        <label class="form-label">
+            Título <span class="text-danger">*</span>
+        </label>
+
         <input type="text" name="title" class="form-control" required>
     </div>
 
+    <!-- CATEGORIA DEFEITO -->
     <div class="mb-3">
-        <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
-
-        <input type="text" id="defectSearch" class="form-control mb-2"
-            placeholder="Pesquisar defeito/problema... Ex: HDMI, FEEDER, TST002">
+        <label class="form-label">
+            Categoria Defeito <span class="text-danger">*</span>
+        </label>
 
         <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
-            <option value="">Selecione uma categoria de defeito</option>
+
+            <option value=""></option>
 
             {% for defect in defect_categories %}
-            <option value="{{ defect.id }}" data-area="{{ defect.area }}"
-                data-search="{{ defect.code }} {{ defect.description }} {{ defect.area }}">
+            <option value="{{ defect.id }}">
                 {{ defect.code }} - {{ defect.description }} | {{ defect.area }}
             </option>
             {% endfor %}
+
         </select>
     </div>
 
+    <!-- DESCRIÇÃO -->
     <div class="mb-3">
         <label class="form-label">Descrição</label>
+
         <textarea name="description" class="form-control" rows="5"></textarea>
     </div>
 
+    <!-- LINHA 1 -->
     <div class="row">
+
+        <!-- ÁREA -->
         <div class="col-md-4 mb-3">
             <label class="form-label">Área Engenharia</label>
+
             <select name="category" class="form-select" required>
+
                 <option value="">Selecione</option>
                 <option>Engenharia de Teste</option>
                 <option>Engenharia SMT</option>
                 <option>Engenharia de Processo</option>
+
             </select>
         </div>
 
+        <!-- PRIORIDADE -->
         <div class="col-md-4 mb-3">
             <label class="form-label">Prioridade</label>
+
             <select name="priority" class="form-select" required>
+
                 <option>Baixa</option>
                 <option selected>Média</option>
                 <option>Alta</option>
                 <option>Crítica</option>
+
             </select>
         </div>
 
+        <!-- MODELO -->
         <div class="col-md-4 mb-3">
             <label class="form-label">Modelo</label>
+
             <select name="model" class="form-select" required>
+
                 <option value="">Selecione</option>
                 <option>IPS3 INTEL</option>
                 <option>LOQ IRX9</option>
                 <option>V14/V15 G5 IRL</option>
                 <option>M75Q5 SH</option>
                 <option>OUTRO</option>
+
             </select>
         </div>
+
     </div>
 
-    <div class="mb-3">
+    <!-- LINHA -->
+    <div class="mb-4">
         <label class="form-label">Linha</label>
+
         <select name="station" class="form-select" required>
+
             <option value="">Selecione</option>
-            <option>SMT 5</option>
-            <option>SMT 12</option>
-            <option>SMT 14</option>
-            <option>SMT 16</option>
-            <option>SMT 18</option>
-            <option>IMC 2</option>
-            <option>IMC 4</option>
-            <option>IMC 6</option>
-            <option>IMC 8</option>
-            <option>IMC 10</option>
-            <option>IMC 12</option>
-            <option>IMC 14</option>
+
+            <option>SMT5</option>
+            <option>SMT12</option>
+            <option>SMT14</option>
+            <option>SMT16</option>
+            <option>SMT18</option>
+
+            <option>IMC2</option>
+            <option>IMC4</option>
+            <option>IMC6</option>
+            <option>IMC8</option>
+            <option>IMC10</option>
+            <option>IMC12</option>
+            <option>IMC14</option>
+
         </select>
     </div>
 
-    <button type="submit" class="btn btn-success">Salvar Chamado</button>
-    <a href="{{ url_for('tickets') }}" class="btn btn-danger">Cancelar</a>
+    <!-- BOTÕES -->
+    <button type="submit" class="btn btn-success">
+        Salvar Chamado
+    </button>
+
+    <a href="{{ url_for('tickets') }}" class="btn btn-danger">
+        Cancelar
+    </a>
 
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+
 <script>
-    const defectSearch = document.getElementById("defectSearch");
-    const defectSelect = document.getElementById("defectCategorySelect");
-    const originalOptions = Array.from(defectSelect.options);
+    $(document).ready(function () {
 
-    defectSearch.addEventListener("keyup", function () {
-        const search = defectSearch.value.toLowerCase();
-
-        defectSelect.innerHTML = "";
-
-        originalOptions.forEach(option => {
-            const text = option.dataset.search ? option.dataset.search.toLowerCase() : option.text.toLowerCase();
-
-            if (option.value === "" || text.includes(search)) {
-                defectSelect.appendChild(option);
+        $('#defectCategorySelect').select2({
+            placeholder: "Pesquisar defeito/problema...",
+            allowClear: true,
+            width: '100%',
+            language: {
+                noResults: function () {
+                    return "Nenhum resultado encontrado";
+                },
+                searching: function () {
+                    return "Buscando...";
+                }
             }
         });
+
     });
 </script>
 
