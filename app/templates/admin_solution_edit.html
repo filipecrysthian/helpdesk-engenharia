@@ -9,6 +9,7 @@
     <div class="card-body">
 
         <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             <div class="row">
                 <div class="col-md-8 mb-3">
@@ -29,7 +30,7 @@
                 Salvar Alterações
             </button>
 
-            <a href="{{ url_for('admin_solutions') }}" class="btn btn-secondary">
+            <a href="{{ url_for('admin.solutions') }}" class="btn btn-secondary">
                 Voltar
             </a>
 

@@ -5,6 +5,7 @@
 <h3>Novo Chamado</h3>
 
 <form method="POST" class="mt-4">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
     <div class="mb-3">
         <label class="form-label">Título <span class="text-danger">*</span></label>
@@ -75,7 +76,7 @@
     </div>
 
     <button type="submit" class="btn btn-success">Salvar Chamado</button>
-    <a href="{{ url_for('tickets') }}" class="btn btn-danger">Cancelar</a>
+    <a href="{{ url_for('main.tickets') }}" class="btn btn-danger">Cancelar</a>
 
 </form>
 

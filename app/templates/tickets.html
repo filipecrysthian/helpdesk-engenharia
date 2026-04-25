@@ -8,7 +8,7 @@
         <small class="text-muted">Gerenciamento de tickets de engenharia</small>
     </div>
 
-    <a href="{{ url_for('ticket_new') }}" class="btn btn-success">
+    <a href="{{ url_for('main.ticket_new') }}" class="btn btn-success">
         + Novo Chamado
     </a>
 </div>
@@ -20,7 +20,7 @@
         <div class="card shadow-sm border-0 bg-primary text-white">
             <div class="card-body">
                 <h6>Total</h6>
-                <h2>{{ tickets|length }}</h2>
+                <h2>{{ total_tickets }}</h2>
             </div>
         </div>
     </div>
@@ -29,7 +29,7 @@
         <div class="card shadow-sm border-0 bg-warning text-dark">
             <div class="card-body">
                 <h6>Abertos</h6>
-                <h2>{{ tickets | selectattr("status", "equalto", "Aberto") | list | length }}</h2>
+                <h2>{{ open_tickets }}</h2>
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
         <div class="card shadow-sm border-0 bg-info text-white">
             <div class="card-body">
                 <h6>Em Atendimento</h6>
-                <h2>{{ tickets | selectattr("status", "equalto", "Em atendimento") | list | length }}</h2>
+                <h2>{{ progress_tickets }}</h2>
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
         <div class="card shadow-sm border-0 bg-success text-white">
             <div class="card-body">
                 <h6>Fechados</h6>
-                <h2>{{ tickets | selectattr("status", "equalto", "Fechado") | list | length }}</h2>
+                <h2>{{ closed_tickets }}</h2>
             </div>
         </div>
     </div>
@@ -55,44 +55,38 @@
 </div>
 
 <!-- FILTROS -->
-<div class="card shadow-sm mb-4">
+<form method="GET" action="{{ url_for('main.tickets') }}" class="card shadow-sm mb-4">
     <div class="card-body">
-
-        <div class="row">
-
+        <div class="row g-2">
             <div class="col-md-4">
-                <input type="text" id="searchInput" class="form-control"
-                    placeholder="Buscar título, área, defeito ou linha...">
+                <input type="text" name="search" class="form-control"
+                    placeholder="Buscar título, área, defeito..." value="{{ request.args.get('search', '') }}">
             </div>
-
             <div class="col-md-3">
-                <select id="statusFilter" class="form-select">
+                <select name="status" class="form-select">
                     <option value="">Todos Status</option>
-                    <option>Aberto</option>
-                    <option>Fechado</option>
+                    <option value="Aberto" {% if request.args.get('status') == 'Aberto' %}selected{% endif %}>Aberto</option>
+                    <option value="Fechado" {% if request.args.get('status') == 'Fechado' %}selected{% endif %}>Fechado</option>
                 </select>
             </div>
-
             <div class="col-md-3">
-                <select id="priorityFilter" class="form-select">
+                <select name="priority" class="form-select">
                     <option value="">Todas Prioridades</option>
-                    <option>Baixa</option>
-                    <option>Média</option>
-                    <option>Alta</option>
-                    <option>Crítica</option>
+                    <option value="Baixa" {% if request.args.get('priority') == 'Baixa' %}selected{% endif %}>Baixa</option>
+                    <option value="Média" {% if request.args.get('priority') == 'Média' %}selected{% endif %}>Média</option>
+                    <option value="Alta" {% if request.args.get('priority') == 'Alta' %}selected{% endif %}>Alta</option>
+                    <option value="Crítica" {% if request.args.get('priority') == 'Crítica' %}selected{% endif %}>Crítica</option>
                 </select>
             </div>
-
-            <div class="col-md-2">
-                <button onclick="clearFilters()" class="btn btn-secondary w-100">
-                    Limpar
-                </button>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
             </div>
-
+            <div class="col-md-1">
+                <a href="{{ url_for('main.tickets') }}" class="btn btn-secondary w-100">Limpar</a>
+            </div>
         </div>
-
     </div>
-</div>
+</form>
 
 <!-- TABELA -->
 <div class="card shadow-sm">
@@ -189,7 +183,7 @@
                     </td>
 
                     <td>
-                        <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ url_for('main.ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
                             Abrir
                         </a>
                     </td>
@@ -204,44 +198,30 @@
     </div>
 </div>
 
-<!-- FILTROS -->
-<script>
-    const searchInput = document.getElementById("searchInput");
-    const statusFilter = document.getElementById("statusFilter");
-    const priorityFilter = document.getElementById("priorityFilter");
+<!-- PAGINAÇÃO -->
+<nav aria-label="Navegação de páginas" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.prev_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) if pagination.has_prev else '#' }}">Anterior</a>
+        </li>
+        
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                <li class="page-item {% if pagination.page == page_num %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.tickets', page=page_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) }}">{{ page_num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.next_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) if pagination.has_next else '#' }}">Próxima</a>
+        </li>
+    </ul>
+</nav>
 
-    searchInput.addEventListener("keyup", filterTable);
-    statusFilter.addEventListener("change", filterTable);
-    priorityFilter.addEventListener("change", filterTable);
 
-    function filterTable() {
-        let search = searchInput.value.toLowerCase();
-        let status = statusFilter.value.toLowerCase();
-        let priority = priorityFilter.value.toLowerCase();
-
-        let rows = document.querySelectorAll("#ticketTable tbody tr");
-
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-
-            let matchSearch = text.includes(search);
-            let matchStatus = status === "" || text.includes(status);
-            let matchPriority = priority === "" || text.includes(priority);
-
-            row.style.display =
-                (matchSearch && matchStatus && matchPriority)
-                    ? ""
-                    : "none";
-        });
-    }
-
-    function clearFilters() {
-        searchInput.value = "";
-        statusFilter.value = "";
-        priorityFilter.value = "";
-        filterTable();
-    }
-</script>
 
 <!-- CONTADOR -->
 <script>

@@ -8,7 +8,7 @@
         <small class="text-muted">Cadastro e controle de acesso dos usuários do sistema</small>
     </div>
 
-    <a href="{{ url_for('admin_user_new') }}" class="btn btn-success">
+    <a href="{{ url_for('admin.user_new') }}" class="btn btn-success">
         + Novo Usuário
     </a>
 </div>
@@ -55,7 +55,7 @@
                     </td>
                     <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
                     <td>
-                        <a href="{{ url_for('admin_user_edit', user_id=user.id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ url_for('admin.user_edit', user_id=user.id) }}" class="btn btn-sm btn-primary">
                             Editar
                         </a>
                     </td>

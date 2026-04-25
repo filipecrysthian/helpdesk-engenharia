@@ -22,7 +22,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
 
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
                 Helpdesk Engenharia
             </a>
 
@@ -30,15 +30,15 @@
             <div class="d-flex align-items-center">
 
                 {% if current_user.role == "admin" %}
-                <a href="{{ url_for('admin_users') }}" class="btn btn-outline-info btn-sm me-2">
+                <a href="{{ url_for('admin.users') }}" class="btn btn-outline-info btn-sm me-2">
                     Usuários
                 </a>
 
-                <a href="{{ url_for('admin_defects') }}" class="btn btn-outline-warning btn-sm me-2">
+                <a href="{{ url_for('admin.defects') }}" class="btn btn-outline-warning btn-sm me-2">
                     Defeitos
                 </a>
 
-                <a href="{{ url_for('admin_solutions') }}" class="btn btn-outline-success btn-sm me-2">
+                <a href="{{ url_for('admin.solutions') }}" class="btn btn-outline-success btn-sm me-2">
                     Soluções
                 </a>
                 {% endif %}
@@ -47,7 +47,7 @@
                     {{ current_user.name }} | {{ current_user.role }}
                 </span>
 
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
                     Sair
                 </a>
 

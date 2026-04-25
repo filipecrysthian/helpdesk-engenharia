@@ -34,6 +34,7 @@
                         {% endwith %}
 
                         <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
                             <div class="mb-3">
                                 <label class="form-label">Email / Login</label>
@@ -50,7 +51,7 @@
                             </button>
 
                             <div class="mt-3">
-                                <a href="{{ url_for('register') }}" class="btn btn-outline-secondary w-100">
+                                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary w-100">
                                     Criar conta
                                 </a>
                             </div>

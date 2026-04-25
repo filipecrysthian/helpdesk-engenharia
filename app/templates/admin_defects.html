@@ -9,6 +9,7 @@
     <div class="card-body">
 
         <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             <div class="row">
 
@@ -39,7 +40,7 @@
                 Cadastrar Defeito
             </button>
 
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
                 Voltar
             </a>
 
@@ -77,9 +78,10 @@
                         {% endif %}
                     </td>
                     <td class="text-end">
-                        <a href="{{ url_for('admin_defect_edit', id=defect.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <a href="{{ url_for('admin.defect_edit', id=defect.id) }}" class="btn btn-sm btn-primary">Editar</a>
                         
-                        <form method="POST" action="{{ url_for('admin_defect_toggle', id=defect.id) }}" class="d-inline">
+                        <form method="POST" action="{{ url_for('admin.defect_toggle', id=defect.id) }}" class="d-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             {% if defect.active %}
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Desativar">Desativar</button>
                             {% else %}
