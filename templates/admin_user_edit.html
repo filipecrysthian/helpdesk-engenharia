@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Editar Usuário</h3>
+<small class="text-muted">Alterar dados, perfil e status do usuário</small>
+
+<form method="POST" class="mt-4">
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nome <span class="text-danger">*</span></label>
+            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Sobrenome <span class="text-danger">*</span></label>
+            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email / Login <span class="text-danger">*</span></label>
+        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Perfil <span class="text-danger">*</span></label>
+            <select name="role" class="form-select" required>
+                <option value="solicitante" {% if user.role=="solicitante" %}selected{% endif %}>Solicitante</option>
+                <option value="engenharia" {% if user.role=="engenharia" %}selected{% endif %}>Engenharia</option>
+                <option value="gestor" {% if user.role=="gestor" %}selected{% endif %}>Gestor</option>
+                <option value="admin" {% if user.role=="admin" %}selected{% endif %}>Admin</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Status <span class="text-danger">*</span></label>
+            <select name="active" class="form-select" required>
+                <option value="1" {% if user.active %}selected{% endif %}>Ativo</option>
+                <option value="0" {% if not user.active %}selected{% endif %}>Inativo</option>
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Salvar Alterações</button>
+    <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">Voltar</a>
+
+</form>
+
+<hr class="my-4">
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        Redefinir Senha
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin_user_reset_password', user_id=user.id) }}">
+            <div class="mb-3">
+                <label class="form-label">Nova senha</label>
+                <input type="password" name="new_password" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-warning">
+                Redefinir Senha
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

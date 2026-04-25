@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Novo Usuário</h3>
+<small class="text-muted">Cadastrar novo usuário no sistema</small>
+
+<form method="POST" class="mt-4">
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nome <span class="text-danger">*</span></label>
+            <input type="text" name="first_name" class="form-control" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Sobrenome <span class="text-danger">*</span></label>
+            <input type="text" name="last_name" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email / Login <span class="text-danger">*</span></label>
+        <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Senha <span class="text-danger">*</span></label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Perfil <span class="text-danger">*</span></label>
+            <select name="role" class="form-select" required>
+                <option value="solicitante">Solicitante</option>
+                <option value="engenharia">Engenharia</option>
+                <option value="gestor">Gestor</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Status <span class="text-danger">*</span></label>
+            <select name="active" class="form-select" required>
+                <option value="1" selected>Ativo</option>
+                <option value="0">Inativo</option>
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Cadastrar Usuário</button>
+    <a href="{{ url_for('admin_users') }}" class="btn btn-danger">Cancelar</a>
+
+</form>
+
+{% endblock %}

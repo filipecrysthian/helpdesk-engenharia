@@ -30,6 +30,10 @@
             <div class="d-flex align-items-center">
 
                 {% if current_user.role == "admin" %}
+                <a href="{{ url_for('admin_users') }}" class="btn btn-outline-info btn-sm me-2">
+                    Usuários
+                </a>
+
                 <a href="{{ url_for('admin_defects') }}" class="btn btn-outline-warning btn-sm me-2">
                     Defeitos
                 </a>
