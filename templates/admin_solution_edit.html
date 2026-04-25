@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Editar Categoria de Solução</h3>
+<small class="text-muted">Alterar a solução padrão</small>
+
+<div class="card shadow-sm mt-4 mb-4">
+    <div class="card-body">
+
+        <form method="POST">
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="description" class="form-control" value="{{ sol.description }}" required>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Status</label>
+                    <select name="active" class="form-select" required>
+                        <option value="1" {% if sol.active %}selected{% endif %}>Ativo</option>
+                        <option value="0" {% if not sol.active %}selected{% endif %}>Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Salvar Alterações
+            </button>
+
+            <a href="{{ url_for('admin_solutions') }}" class="btn btn-secondary">
+                Voltar
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

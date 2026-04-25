@@ -55,6 +55,13 @@ class DefectCategory(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
 
 
+class SolutionCategory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(200), unique=True, nullable=False)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+
+
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
@@ -132,6 +139,25 @@ def create_default_defect_categories():
                 area=area
             )
             db.session.add(defect)
+
+    db.session.commit()
+
+
+def create_default_solution_categories():
+    default_solutions = [
+        "TROCA DO CABO",
+        "TROCA DO SWITCH DE VÍDEO",
+        "CONFIGURAÇÃO DO SCRIPT DE TESTE",
+        "FALSA FALHA",
+        "FALHA REAL",
+        "OUTROS",
+    ]
+
+    for desc in default_solutions:
+        exists = SolutionCategory.query.filter_by(description=desc).first()
+        if not exists:
+            sol = SolutionCategory(description=desc)
+            db.session.add(sol)
 
     db.session.commit()
 
@@ -306,12 +332,14 @@ def ticket_detail(ticket_id):
         return redirect(url_for("ticket_detail", ticket_id=ticket.id))
 
     histories = TicketHistory.query.filter_by(ticket_id=ticket.id).order_by(TicketHistory.created_at.desc()).all()
+    solution_categories = SolutionCategory.query.filter_by(active=True).order_by(SolutionCategory.description.asc()).all()
 
     return render_template(
         "ticket_detail.html",
         ticket=ticket,
         creator=creator,
-        histories=histories
+        histories=histories,
+        solution_categories=solution_categories
     )
 
 
@@ -349,6 +377,104 @@ def admin_defects():
     ).all()
 
     return render_template("admin_defects.html", defects=defects)
+
+
+@app.route("/admin/defects/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_defect_edit(id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    defect = DefectCategory.query.get_or_404(id)
+
+    if request.method == "POST":
+        defect.code = request.form.get("code").strip().upper()
+        defect.description = request.form.get("description").strip().upper()
+        defect.area = request.form.get("area")
+        defect.active = True if request.form.get("active") == "1" else False
+
+        db.session.commit()
+        flash("Categoria de defeito atualizada com sucesso!", "success")
+        return redirect(url_for("admin_defects"))
+
+    return render_template("admin_defect_edit.html", defect=defect)
+
+
+@app.route("/admin/defects/<int:id>/toggle", methods=["POST"])
+@login_required
+def admin_defect_toggle(id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    defect = DefectCategory.query.get_or_404(id)
+    defect.active = not defect.active
+    db.session.commit()
+
+    flash(f"Status da categoria {defect.code} alterado com sucesso!", "success")
+    return redirect(url_for("admin_defects"))
+
+
+@app.route("/admin/solutions", methods=["GET", "POST"])
+@login_required
+def admin_solutions():
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        description = request.form.get("description").strip().upper()
+
+        exists = SolutionCategory.query.filter_by(description=description).first()
+
+        if exists:
+            flash("Já existe uma categoria de solução com essa descrição.", "danger")
+        else:
+            sol = SolutionCategory(description=description)
+            db.session.add(sol)
+            db.session.commit()
+            flash("Categoria de solução cadastrada com sucesso!", "success")
+
+        return redirect(url_for("admin_solutions"))
+
+    solutions = SolutionCategory.query.order_by(SolutionCategory.description.asc()).all()
+    return render_template("admin_solutions.html", solutions=solutions)
+
+
+@app.route("/admin/solutions/<int:id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_solution_edit(id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    sol = SolutionCategory.query.get_or_404(id)
+
+    if request.method == "POST":
+        sol.description = request.form.get("description").strip().upper()
+        sol.active = True if request.form.get("active") == "1" else False
+
+        db.session.commit()
+        flash("Categoria de solução atualizada com sucesso!", "success")
+        return redirect(url_for("admin_solutions"))
+
+    return render_template("admin_solution_edit.html", sol=sol)
+
+
+@app.route("/admin/solutions/<int:id>/toggle", methods=["POST"])
+@login_required
+def admin_solution_toggle(id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    sol = SolutionCategory.query.get_or_404(id)
+    sol.active = not sol.active
+    db.session.commit()
+
+    flash(f"Status da solução alterado com sucesso!", "success")
+    return redirect(url_for("admin_solutions"))
 
 
 @app.route("/admin/users")
@@ -451,5 +577,6 @@ if __name__ == "__main__":
         db.create_all()
         create_admin_user()
         create_default_defect_categories()
+        create_default_solution_categories()
 
     app.run(debug=True)

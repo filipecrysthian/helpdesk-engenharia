@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Cadastro de Categorias de Solução</h3>
+<small class="text-muted">Área administrativa para cadastrar soluções padrão para fechamento de chamados</small>
+
+<div class="card shadow-sm mt-4 mb-4">
+    <div class="card-body">
+
+        <form method="POST">
+
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Descrição da Solução</label>
+                    <input type="text" name="description" class="form-control" placeholder="Ex: TROCA DO CABO DE ALIMENTAÇÃO" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Cadastrar Solução
+            </button>
+
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                Voltar
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for sol in solutions %}
+                <tr>
+                    <td><strong>#{{ sol.id }}</strong></td>
+                    <td>{{ sol.description }}</td>
+                    <td>
+                        {% if sol.active %}
+                        <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inativo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ url_for('admin_solution_edit', id=sol.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        
+                        <form method="POST" action="{{ url_for('admin_solution_toggle', id=sol.id) }}" class="d-inline">
+                            {% if sol.active %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Desativar">Desativar</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Ativar">Ativar</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">
+                        Nenhuma solução cadastrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

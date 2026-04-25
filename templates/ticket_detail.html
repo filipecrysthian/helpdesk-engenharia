@@ -90,12 +90,9 @@
                         data-placeholder="Selecione" required>
 
                         <option value=""></option>
-                        <option>TROCA DO CABO</option>
-                        <option>TROCA DO SWITCH DE VÍDEO</option>
-                        <option>CONFIGURAÇÃO DO SCRIPT DE TESTE</option>
-                        <option>FALSA FALHA</option>
-                        <option>FALHA REAL</option>
-                        <option>OUTROS</option>
+                        {% for sc in solution_categories %}
+                        <option value="{{ sc.description }}">{{ sc.description }}</option>
+                        {% endfor %}
 
                     </select>
                 </div>

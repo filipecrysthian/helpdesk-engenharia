@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Editar Categoria de Defeito</h3>
+<small class="text-muted">Alterar os dados do defeito padrão</small>
+
+<div class="card shadow-sm mt-4 mb-4">
+    <div class="card-body">
+
+        <form method="POST">
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Código</label>
+                    <input type="text" name="code" class="form-control" value="{{ defect.code }}" required>
+                </div>
+
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="description" class="form-control" value="{{ defect.description }}" required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Área Engenharia</label>
+                    <select name="area" class="form-select" required>
+                        <option value="Engenharia de Teste" {% if defect.area == "Engenharia de Teste" %}selected{% endif %}>Engenharia de Teste</option>
+                        <option value="Engenharia SMT" {% if defect.area == "Engenharia SMT" %}selected{% endif %}>Engenharia SMT</option>
+                        <option value="Engenharia de Processo" {% if defect.area == "Engenharia de Processo" %}selected{% endif %}>Engenharia de Processo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Status</label>
+                    <select name="active" class="form-select" required>
+                        <option value="1" {% if defect.active %}selected{% endif %}>Ativo</option>
+                        <option value="0" {% if not defect.active %}selected{% endif %}>Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Salvar Alterações
+            </button>
+
+            <a href="{{ url_for('admin_defects') }}" class="btn btn-secondary">
+                Voltar
+            </a>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -59,6 +59,7 @@
                     <th>Descrição</th>
                     <th>Área</th>
                     <th>Status</th>
+                    <th class="text-end">Ações</th>
                 </tr>
             </thead>
 
@@ -75,10 +76,21 @@
                         <span class="badge bg-secondary">Inativo</span>
                         {% endif %}
                     </td>
+                    <td class="text-end">
+                        <a href="{{ url_for('admin_defect_edit', id=defect.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        
+                        <form method="POST" action="{{ url_for('admin_defect_toggle', id=defect.id) }}" class="d-inline">
+                            {% if defect.active %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Desativar">Desativar</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Ativar">Ativar</button>
+                            {% endif %}
+                        </form>
+                    </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" class="text-center">
+                    <td colspan="5" class="text-center">
                         Nenhum defeito cadastrado.
                     </td>
                 </tr>
