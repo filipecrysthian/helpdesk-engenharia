@@ -162,6 +162,12 @@ def register():
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
 
+        allowed_domains = ["@empresa", "@digiboard"]
+
+        if not any(domain in email for domain in allowed_domains):
+            flash("Email inválido. Utilize um email corporativo valido.", "danger")
+            return redirect(url_for("register"))
+
         if password != confirm_password:
             flash("As senhas não conferem.", "danger")
             return redirect(url_for("register"))

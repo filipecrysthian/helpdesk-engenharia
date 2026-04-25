@@ -80,6 +80,25 @@
             </div>
         </div>
     </div>
+    <script>
+        document.querySelector("form").addEventListener("submit", function (event) {
+            const email = document.querySelector("input[name='email']").value.toLowerCase();
+            const password = document.querySelector("input[name='password']").value;
+            const confirmPassword = document.querySelector("input[name='confirm_password']").value;
+
+            if (!email.includes("@empresa") && !email.includes("@digiboard")) {
+                alert("Email inválido. Utilize um email corporativo @empresa ou @digiboard.");
+                event.preventDefault();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("As senhas não conferem.");
+                event.preventDefault();
+                return;
+            }
+        });
+    </script>
 
 </body>
 
