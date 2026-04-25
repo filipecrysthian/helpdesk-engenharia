@@ -2,159 +2,277 @@
 
 {% block content %}
 
-<h3>Novo Chamado</h3>
-
-<form method="POST" class="mt-4">
-
-    <div class="mb-3">
-        <label class="form-label">Título <span class="text-danger">*</span></label>
-        <input type="text" name="title" class="form-control" required>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Chamados</h2>
+        <small class="text-muted">Gerenciamento de tickets de engenharia</small>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Descrição</label>
-        <textarea name="description" class="form-control" rows="5"></textarea>
+    <a href="{{ url_for('ticket_new') }}" class="btn btn-success">
+        + Novo Chamado
+    </a>
+</div>
+
+<!-- CARDS RESUMO -->
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+            <div class="card-body">
+                <h6>Total</h6>
+                <h2>{{ tickets|length }}</h2>
+            </div>
+        </div>
     </div>
 
-    <div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-warning text-dark">
+            <div class="card-body">
+                <h6>Abertos</h6>
+                <h2>{{ tickets | selectattr("status", "equalto", "Aberto") | list | length }}</h2>
+            </div>
+        </div>
+    </div>
 
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Prioridade <span class="text-danger">*</span></label>
-            <select name="priority" class="form-select" required>
-                <option>Baixa</option>
-                <option selected>Média</option>
-                <option>Alta</option>
-                <option>Crítica</option>
-            </select>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-info text-white">
+            <div class="card-body">
+                <h6>Em Atendimento</h6>
+                <h2>{{ tickets | selectattr("status", "equalto", "Em atendimento") | list | length }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-success text-white">
+            <div class="card-body">
+                <h6>Fechados</h6>
+                <h2>{{ tickets | selectattr("status", "equalto", "Fechado") | list | length }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- FILTROS -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control"
+                    placeholder="Buscar título, área, defeito ou linha...">
+            </div>
+
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="">Todos Status</option>
+                    <option>Aberto</option>
+                    <option>Em atendimento</option>
+                    <option>Fechado</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select id="priorityFilter" class="form-select">
+                    <option value="">Todas Prioridades</option>
+                    <option>Baixa</option>
+                    <option>Média</option>
+                    <option>Alta</option>
+                    <option>Crítica</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button onclick="clearFilters()" class="btn btn-secondary w-100">
+                    Limpar
+                </button>
+            </div>
+
         </div>
 
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Área Engenharia <span class="text-danger">*</span></label>
-            <select name="category" id="areaSelect" class="form-select" required>
-                <option value="">Selecione</option>
-                <option value="Engenharia de Teste">Engenharia de Teste</option>
-                <option value="Engenharia SMT">Engenharia SMT</option>
-                <option value="Engenharia de Processo">Engenharia de Processo</option>
-            </select>
-        </div>
+    </div>
+</div>
 
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
-            <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
-                <option value="">Selecione...</option>
+<!-- TABELA -->
+<div class="card shadow-sm">
+    <div class="table-responsive">
 
-                {% for defect in defect_categories %}
-                <option value="{{ defect.id }}" data-area="{{ defect.area }}">
-                    {{ defect.code }} - {{ defect.description }}
-                </option>
+        <table class="table table-hover align-middle mb-0" id="ticketTable">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Defeito</th>
+                    <th>Área</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Linha</th>
+                    <th>Data</th>
+                    <th>Hora Abertura</th>
+                    <th>Hora Fechamento</th>
+                    <th>Tempo Aberto</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for ticket in tickets %}
+
+                <tr data-created="{{ ticket.created_at.isoformat() }}"
+                    data-closed="{{ 'true' if ticket.closed_at else 'false' }}">
+
+                    <td>#{{ ticket.id }}</td>
+
+                    <td>{{ ticket.title }}</td>
+
+                    <td>
+                        {% if ticket.defect_category %}
+                        {{ ticket.defect_category.code }} - {{ ticket.defect_category.description }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ ticket.category }}</td>
+
+                    <td>
+                        {% if ticket.priority == 'Crítica' %}
+                        <span class="badge bg-danger">Crítica</span>
+                        {% elif ticket.priority == 'Alta' %}
+                        <span class="badge bg-warning text-dark">Alta</span>
+                        {% elif ticket.priority == 'Média' %}
+                        <span class="badge bg-primary">Média</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Baixa</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if ticket.status == 'Aberto' %}
+                        <span class="badge bg-warning text-dark">Aberto</span>
+                        {% elif ticket.status == 'Em atendimento' %}
+                        <span class="badge bg-info">Em atendimento</span>
+                        {% else %}
+                        <span class="badge bg-success">Fechado</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ ticket.station }}</td>
+
+                    <td>{{ ticket.created_at.strftime('%d/%m/%Y') }}</td>
+
+                    <td>{{ ticket.created_at.strftime('%H:%M:%S') }}</td>
+
+                    <td>
+                        {% if ticket.closed_at %}
+                        {{ ticket.closed_at.strftime('%H:%M:%S') }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if ticket.closed_at %}
+                        <span class="badge bg-success">Finalizado</span>
+                        {% else %}
+                        <span class="elapsed-time" data-created="{{ ticket.created_at.isoformat() }}">
+                            00:00:00
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{{ url_for('ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
+                            Abrir
+                        </a>
+                    </td>
+
+                </tr>
+
                 {% endfor %}
-            </select>
-        </div>
 
-        <div class="col-md-3 mb-3">
-            <label class="form-label">Linha <span class="text-danger">*</span></label>
-            <select name="station" id="lineSelect" class="form-select" required>
-                <option value="">Selecione</option>
+            </tbody>
 
-                <option value="SMT5" data-type="SMT">SMT5</option>
-                <option value="SMT12" data-type="SMT">SMT12</option>
-                <option value="SMT14" data-type="SMT">SMT14</option>
-                <option value="SMT16" data-type="SMT">SMT16</option>
-                <option value="SMT18" data-type="SMT">SMT18</option>
-
-                <option value="IMC2" data-type="IMC">IMC2</option>
-                <option value="IMC4" data-type="IMC">IMC4</option>
-                <option value="IMC6" data-type="IMC">IMC6</option>
-                <option value="IMC8" data-type="IMC">IMC8</option>
-                <option value="IMC10" data-type="IMC">IMC10</option>
-                <option value="IMC12" data-type="IMC">IMC12</option>
-                <option value="IMC14" data-type="IMC">IMC14</option>
-            </select>
-        </div>
-
+        </table>
     </div>
+</div>
 
-    <button type="submit" class="btn btn-success">Salvar Chamado</button>
-    <a href="{{ url_for('tickets') }}" class="btn btn-danger">Cancelar</a>
-
-</form>
-
+<!-- FILTROS -->
 <script>
-    $(document).ready(function () {
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const priorityFilter = document.getElementById("priorityFilter");
 
-        const areaSelect = $("#areaSelect");
-        const defectSelect = $("#defectCategorySelect");
-        const lineSelect = $("#lineSelect");
+    searchInput.addEventListener("keyup", filterTable);
+    statusFilter.addEventListener("change", filterTable);
+    priorityFilter.addEventListener("change", filterTable);
 
-        const allDefectOptions = defectSelect.find("option").clone();
-        const allLineOptions = lineSelect.find("option").clone();
+    function filterTable() {
+        let search = searchInput.value.toLowerCase();
+        let status = statusFilter.value.toLowerCase();
+        let priority = priorityFilter.value.toLowerCase();
 
-        defectSelect.select2({
-            placeholder: "Pesquisar defeito/problema...",
-            allowClear: true,
-            width: "100%",
-            language: {
-                noResults: function () {
-                    return "Nenhum resultado encontrado";
-                },
-                searching: function () {
-                    return "Buscando...";
-                }
+        let rows = document.querySelectorAll("#ticketTable tbody tr");
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+
+            let matchSearch = text.includes(search);
+            let matchStatus = status === "" || text.includes(status);
+            let matchPriority = priority === "" || text.includes(priority);
+
+            row.style.display =
+                (matchSearch && matchStatus && matchPriority)
+                    ? ""
+                    : "none";
+        });
+    }
+
+    function clearFilters() {
+        searchInput.value = "";
+        statusFilter.value = "";
+        priorityFilter.value = "";
+        filterTable();
+    }
+</script>
+
+<!-- CONTADOR -->
+<script>
+    function updateElapsedTimes() {
+
+        const elements = document.querySelectorAll(".elapsed-time");
+
+        elements.forEach(element => {
+
+            const row = element.closest("tr");
+            const createdAt = new Date(element.dataset.created);
+            const now = new Date();
+
+            let diff = Math.floor((now - createdAt) / 1000);
+
+            if (diff < 0) diff = 0;
+
+            const hours = String(Math.floor(diff / 3600)).padStart(2, "0");
+            const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+            const seconds = String(diff % 60).padStart(2, "0");
+
+            element.textContent = `${hours}:${minutes}:${seconds}`;
+
+            if (diff > 2700) {
+                row.classList.add("ticket-overdue");
+            } else {
+                row.classList.remove("ticket-overdue");
             }
+
         });
+    }
 
-        function updateDefectsByArea(selectedArea) {
-            defectSelect.empty();
-
-            allDefectOptions.each(function () {
-                const option = $(this);
-                const optionArea = option.data("area");
-
-                if (option.val() === "" || optionArea === selectedArea) {
-                    defectSelect.append(option.clone());
-                }
-            });
-
-            defectSelect.val("").trigger("change");
-        }
-
-        function updateLinesByArea(selectedArea) {
-            lineSelect.empty();
-
-            allLineOptions.each(function () {
-                const option = $(this);
-                const lineType = option.data("type");
-
-                if (option.val() === "") {
-                    lineSelect.append(option.clone());
-                }
-
-                if (selectedArea === "Engenharia de Teste" && lineType === "IMC") {
-                    lineSelect.append(option.clone());
-                }
-
-                if (selectedArea === "Engenharia SMT" && lineType === "SMT") {
-                    lineSelect.append(option.clone());
-                }
-
-                if (selectedArea === "Engenharia de Processo" && option.val() !== "") {
-                    lineSelect.append(option.clone());
-                }
-            });
-
-            lineSelect.val("");
-        }
-
-        areaSelect.on("change", function () {
-            const selectedArea = $(this).val();
-
-            updateDefectsByArea(selectedArea);
-            updateLinesByArea(selectedArea);
-        });
-
-        updateDefectsByArea("");
-        updateLinesByArea("");
-    });
+    setInterval(updateElapsedTimes, 1000);
+    updateElapsedTimes();
 </script>
 
 {% endblock %}
