@@ -10,17 +10,37 @@
     </div>
 
     <div class="card-body">
+
         <p><strong>Descrição:</strong></p>
         <p>{{ ticket.description }}</p>
 
         <hr>
 
-        <p><strong>Categoria:</strong> {{ ticket.category }}</p>
+        <p>
+            <strong>Categoria Defeito:</strong>
+            {% if ticket.defect_category %}
+            {{ ticket.defect_category.code }} - {{ ticket.defect_category.description }}
+            {% else %}
+            -
+            {% endif %}
+        </p>
+
+        <p><strong>Área Engenharia:</strong> {{ ticket.category }}</p>
         <p><strong>Prioridade:</strong> {{ ticket.priority }}</p>
         <p><strong>Status:</strong> {{ ticket.status }}</p>
-        <p><strong>Modelo:</strong> {{ ticket.model }}</p>
-        <p><strong>Estação:</strong> {{ ticket.station }}</p>
-        <p><strong>Criado em:</strong> {{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+        <p><strong>Linha:</strong> {{ ticket.station }}</p>
+        <p><strong>Data de abertura:</strong> {{ ticket.created_at.strftime('%d/%m/%Y') }}</p>
+        <p><strong>Hora de abertura:</strong> {{ ticket.created_at.strftime('%H:%M:%S') }}</p>
+
+        <p>
+            <strong>Hora de fechamento:</strong>
+            {% if ticket.closed_at %}
+            {{ ticket.closed_at.strftime('%H:%M:%S') }}
+            {% else %}
+            -
+            {% endif %}
+        </p>
+
     </div>
 </div>
 

@@ -2,28 +2,21 @@
 
 {% block content %}
 
-<h2 class="mb-4">Novo Chamado</h2>
+<h3>Novo Chamado</h3>
 
-<form method="POST">
+<form method="POST" class="mt-4">
 
-    <!-- TITULO -->
     <div class="mb-3">
-        <label class="form-label">
-            Título <span class="text-danger">*</span>
-        </label>
-
+        <label class="form-label">Título <span class="text-danger">*</span></label>
         <input type="text" name="title" class="form-control" required>
     </div>
 
-    <!-- CATEGORIA DEFEITO -->
     <div class="mb-3">
-        <label class="form-label">
-            Categoria Defeito <span class="text-danger">*</span>
-        </label>
+        <label class="form-label">Categoria Defeito <span class="text-danger">*</span></label>
 
         <select name="defect_category_id" id="defectCategorySelect" class="form-select" required>
 
-            <option value=""></option>
+            <option value="">Selecione...</option>
 
             {% for defect in defect_categories %}
             <option value="{{ defect.id }}">
@@ -34,17 +27,13 @@
         </select>
     </div>
 
-    <!-- DESCRIÇÃO -->
     <div class="mb-3">
         <label class="form-label">Descrição</label>
-
         <textarea name="description" class="form-control" rows="5"></textarea>
     </div>
 
-    <!-- LINHA 1 -->
     <div class="row">
 
-        <!-- ÁREA -->
         <div class="col-md-4 mb-3">
             <label class="form-label">Área Engenharia</label>
 
@@ -58,7 +47,6 @@
             </select>
         </div>
 
-        <!-- PRIORIDADE -->
         <div class="col-md-4 mb-3">
             <label class="form-label">Prioridade</label>
 
@@ -72,50 +60,32 @@
             </select>
         </div>
 
-        <!-- MODELO -->
         <div class="col-md-4 mb-3">
-            <label class="form-label">Modelo</label>
+            <label class="form-label">Linha</label>
 
-            <select name="model" class="form-select" required>
+            <select name="station" class="form-select" required>
 
                 <option value="">Selecione</option>
-                <option>IPS3 INTEL</option>
-                <option>LOQ IRX9</option>
-                <option>V14/V15 G5 IRL</option>
-                <option>M75Q5 SH</option>
-                <option>OUTRO</option>
+
+                <option>SMT5</option>
+                <option>SMT12</option>
+                <option>SMT14</option>
+                <option>SMT16</option>
+                <option>SMT18</option>
+
+                <option>IMC2</option>
+                <option>IMC4</option>
+                <option>IMC6</option>
+                <option>IMC8</option>
+                <option>IMC10</option>
+                <option>IMC12</option>
+                <option>IMC14</option>
 
             </select>
         </div>
 
     </div>
 
-    <!-- LINHA -->
-    <div class="mb-4">
-        <label class="form-label">Linha</label>
-
-        <select name="station" class="form-select" required>
-
-            <option value="">Selecione</option>
-
-            <option>SMT5</option>
-            <option>SMT12</option>
-            <option>SMT14</option>
-            <option>SMT16</option>
-            <option>SMT18</option>
-
-            <option>IMC2</option>
-            <option>IMC4</option>
-            <option>IMC6</option>
-            <option>IMC8</option>
-            <option>IMC10</option>
-            <option>IMC12</option>
-            <option>IMC14</option>
-
-        </select>
-    </div>
-
-    <!-- BOTÕES -->
     <button type="submit" class="btn btn-success">
         Salvar Chamado
     </button>
@@ -126,13 +96,8 @@
 
 </form>
 
-{% endblock %}
-
-{% block scripts %}
-
 <script>
     $(document).ready(function () {
-
         $('#defectCategorySelect').select2({
             placeholder: "Pesquisar defeito/problema...",
             allowClear: true,
@@ -146,7 +111,6 @@
                 }
             }
         });
-
     });
 </script>
 

@@ -29,6 +29,7 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class DefectCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(20), unique=True, nullable=False)
@@ -37,22 +38,22 @@ class DefectCategory(db.Model):
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
+
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=True)
     category = db.Column(db.String(80), nullable=False)
+    defect_category_id = db.Column(db.Integer, db.ForeignKey("defect_category.id"), nullable=True)
+    defect_category = db.relationship("DefectCategory")
     priority = db.Column(db.String(30), nullable=False, default="Média")
     status = db.Column(db.String(30), nullable=False, default="Aberto")
-    model = db.Column(db.String(80))
     station = db.Column(db.String(80))
     created_by = db.Column(db.Integer, db.ForeignKey("user.id"))
     assigned_to = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now)
     closed_at = db.Column(db.DateTime, nullable=True)
-    defect_category_id = db.Column(db.Integer, db.ForeignKey("defect_category.id"), nullable=True)
-    defect_category = db.relationship("DefectCategory")
 
 
 @login_manager.user_loader
@@ -73,6 +74,34 @@ def create_admin_user():
         db.session.add(admin)
         db.session.commit()
         print("Usuário admin criado: admin / admin123")
+
+
+def create_default_defect_categories():
+    default_defects = [
+        ("TST001", "PLACA PCI MB NÃO LIGA", "Engenharia de Teste"),
+        ("TST002", "PLACA SEM VÍDEO NO LCD", "Engenharia de Teste"),
+        ("TST002A", "PLACA SEM VÍDEO NO HDMI", "Engenharia de Teste"),
+
+        ("SMT001", "NXT PARADA", "Engenharia SMT"),
+        ("SMT002", "FEEDER COM DEFEITO", "Engenharia SMT"),
+        ("SMT002A", "FEEDER TRAVADO", "Engenharia SMT"),
+
+        ("PRC001", "FALHA DE IMPRESSÃO", "Engenharia de Processo"),
+        ("PRC002", "TIRAR TEMPO DA ESTEIRA", "Engenharia de Processo"),
+        ("PRC002A", "AJUSTAR VELOCIDADE DA ESTEIRA", "Engenharia de Processo"),
+    ]
+
+    for code, description, area in default_defects:
+        exists = DefectCategory.query.filter_by(code=code).first()
+        if not exists:
+            defect = DefectCategory(
+                code=code,
+                description=description,
+                area=area
+            )
+            db.session.add(defect)
+
+    db.session.commit()
 
 
 @app.route("/")
@@ -142,7 +171,6 @@ def ticket_new():
             category=request.form.get("category"),
             defect_category_id=request.form.get("defect_category_id"),
             priority=request.form.get("priority"),
-            model=request.form.get("model"),
             station=request.form.get("station"),
             created_by=current_user.id
         )
@@ -155,39 +183,13 @@ def ticket_new():
 
     return render_template("ticket_new.html", defect_categories=defect_categories)
 
-def create_default_defect_categories():
-    default_defects = [
-        ("TST001", "PLACA PCI MB NÃO LIGA", "Engenharia de Teste"),
-        ("TST002", "PLACA SEM VÍDEO NO LCD", "Engenharia de Teste"),
-        ("TST002A", "PLACA SEM VÍDEO NO HDMI", "Engenharia de Teste"),
-
-        ("SMT001", "NXT PARADA", "Engenharia SMT"),
-        ("SMT002", "FEEDER COM DEFEITO", "Engenharia SMT"),
-        ("SMT002A", "FEEDER TRAVADO", "Engenharia SMT"),
-
-        ("PRC001", "FALHA DE IMPRESSÃO", "Engenharia de Processo"),
-        ("PRC002", "TIRAR TEMPO DA ESTEIRA", "Engenharia de Processo"),
-        ("PRC002A", "AJUSTAR VELOCIDADE DA ESTEIRA", "Engenharia de Processo"),
-    ]
-
-    for code, description, area in default_defects:
-        exists = DefectCategory.query.filter_by(code=code).first()
-        if not exists:
-            defect = DefectCategory(
-                code=code,
-                description=description,
-                area=area
-            )
-            db.session.add(defect)
-
-    db.session.commit()
-
 
 @app.route("/tickets/<int:ticket_id>")
 @login_required
 def ticket_detail(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     return render_template("ticket_detail.html", ticket=ticket)
+
 
 @app.route("/admin/defects", methods=["GET", "POST"])
 @login_required
@@ -217,7 +219,10 @@ def admin_defects():
 
         return redirect(url_for("admin_defects"))
 
-    defects = DefectCategory.query.order_by(DefectCategory.area.asc(), DefectCategory.code.asc()).all()
+    defects = DefectCategory.query.order_by(
+        DefectCategory.area.asc(),
+        DefectCategory.code.asc()
+    ).all()
 
     return render_template("admin_defects.html", defects=defects)
 
