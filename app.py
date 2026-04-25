@@ -20,14 +20,30 @@ login_manager.init_app(app)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(50), unique=True, nullable=False)
+
+    first_name = db.Column(db.String(80), nullable=False)
+    last_name = db.Column(db.String(80), nullable=False)
+
+    email = db.Column(db.String(120), unique=True, nullable=False)
+
     password_hash = db.Column(db.String(255), nullable=False)
+
     role = db.Column(db.String(30), nullable=False, default="solicitante")
+
+    active = db.Column(db.Boolean, default=True)
+
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    @property
+    def is_active(self):
+        return self.active
 
 
 class DefectCategory(db.Model):
@@ -62,18 +78,20 @@ def load_user(user_id):
 
 
 def create_admin_user():
-    admin = User.query.filter_by(username="admin").first()
+    admin = User.query.filter_by(email="admin@empresa.com").first()
 
     if not admin:
         admin = User(
-            name="Administrador",
-            username="admin",
+            first_name="Administrador",
+            last_name="Sistema",
+            email="admin@empresa.com",
             password_hash=generate_password_hash("admin123"),
-            role="admin"
+            role="admin",
+            active=True
         )
         db.session.add(admin)
         db.session.commit()
-        print("Usuário admin criado: admin / admin123")
+        print("Usuário admin criado: admin@empresa.com / admin123")
 
 
 def create_default_defect_categories():
@@ -114,16 +132,24 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(email=email).first()
 
-        if user and user.check_password(password):
+        if not user:
+            flash("Email ou senha inválidos.", "danger")
+            return render_template("login.html")
+
+        if not user.active:
+            flash("Usuário inativo. Contate o administrador.", "danger")
+            return render_template("login.html")
+
+        if user.check_password(password):
             login_user(user)
             return redirect(url_for("dashboard"))
 
-        flash("Usuário ou senha inválidos.", "danger")
+        flash("Email ou senha inválidos.", "danger")
 
     return render_template("login.html")
 
@@ -225,6 +251,101 @@ def admin_defects():
     ).all()
 
     return render_template("admin_defects.html", defects=defects)
+
+
+@app.route("/admin/users")
+@login_required
+def admin_users():
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template("admin_users.html", users=users)
+
+
+@app.route("/admin/users/new", methods=["GET", "POST"])
+@login_required
+def admin_user_new():
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        first_name = request.form.get("first_name").strip()
+        last_name = request.form.get("last_name").strip()
+        email = request.form.get("email").strip().lower()
+        password = request.form.get("password")
+        role = request.form.get("role")
+        active = True if request.form.get("active") == "1" else False
+
+        exists = User.query.filter_by(email=email).first()
+
+        if exists:
+            flash("Já existe um usuário cadastrado com este email/login.", "danger")
+            return redirect(url_for("admin_user_new"))
+
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password_hash=generate_password_hash(password),
+            role=role,
+            active=active
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        flash("Usuário cadastrado com sucesso!", "success")
+        return redirect(url_for("admin_users"))
+
+    return render_template("admin_user_new.html")
+
+
+@app.route("/admin/users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_user_edit(user_id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "POST":
+        user.first_name = request.form.get("first_name").strip()
+        user.last_name = request.form.get("last_name").strip()
+        user.email = request.form.get("email").strip().lower()
+        user.role = request.form.get("role")
+        user.active = True if request.form.get("active") == "1" else False
+
+        db.session.commit()
+
+        flash("Usuário atualizado com sucesso!", "success")
+        return redirect(url_for("admin_users"))
+
+    return render_template("admin_user_edit.html", user=user)
+
+
+@app.route("/admin/users/<int:user_id>/reset-password", methods=["POST"])
+@login_required
+def admin_user_reset_password(user_id):
+    if current_user.role != "admin":
+        flash("Acesso negado.", "danger")
+        return redirect(url_for("dashboard"))
+
+    user = User.query.get_or_404(user_id)
+    new_password = request.form.get("new_password")
+
+    if not new_password:
+        flash("Informe uma nova senha.", "danger")
+        return redirect(url_for("admin_user_edit", user_id=user.id))
+
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+
+    flash("Senha redefinida com sucesso!", "success")
+    return redirect(url_for("admin_users"))
 
 
 if __name__ == "__main__":
