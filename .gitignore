@@ -8,3 +8,7 @@ instance/helpdesk.db
 .idea/
 *.log
 commit.py
+app.bak.py
+config.py
+fix_csrf.py
+fix_urls.py
