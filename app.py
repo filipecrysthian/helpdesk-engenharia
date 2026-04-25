@@ -153,6 +153,42 @@ def login():
 
     return render_template("login.html")
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        first_name = request.form.get("first_name").strip()
+        last_name = request.form.get("last_name").strip()
+        email = request.form.get("email").strip().lower()
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        if password != confirm_password:
+            flash("As senhas não conferem.", "danger")
+            return redirect(url_for("register"))
+
+        exists = User.query.filter_by(email=email).first()
+
+        if exists:
+            flash("Já existe um usuário cadastrado com este email.", "danger")
+            return redirect(url_for("register"))
+
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password_hash=generate_password_hash(password),
+            role="solicitante",
+            active=True
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        flash("Usuário criado com sucesso! Faça login para continuar.", "success")
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
 
 @app.route("/logout")
 @login_required
