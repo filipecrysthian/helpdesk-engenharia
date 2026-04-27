@@ -35,7 +35,19 @@ def defects():
 
         return redirect(url_for("admin.defects"))
 
-    defects = DefectCategory.query.order_by(
+    search = request.args.get('search', '').strip()
+    query = DefectCategory.query
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                DefectCategory.code.ilike(f'%{search}%'),
+                DefectCategory.description.ilike(f'%{search}%'),
+                DefectCategory.area.ilike(f'%{search}%')
+            )
+        )
+
+    defects = query.order_by(
         DefectCategory.area.asc(),
         DefectCategory.code.asc()
     ).all()
@@ -90,7 +102,15 @@ def solutions():
 
         return redirect(url_for("admin.solutions"))
 
-    solutions = SolutionCategory.query.order_by(SolutionCategory.id.asc()).all()
+    search = request.args.get('search', '').strip()
+    query = SolutionCategory.query
+    
+    if search:
+        query = query.filter(
+            SolutionCategory.description.ilike(f'%{search}%')
+        )
+
+    solutions = query.order_by(SolutionCategory.id.asc()).all()
     return render_template("admin_solutions.html", solutions=solutions)
 
 
