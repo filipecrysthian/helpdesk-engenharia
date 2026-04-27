@@ -187,14 +187,24 @@ def reports():
 
         tickets = query.order_by(Ticket.created_at.desc()).all()
 
+        # Pré-carregar o histórico de fechamento por ticket para "Fechado Por"
+        closing_history = {}
+        for h in TicketHistory.query.filter_by(new_status="Fechado").all():
+            if h.ticket_id not in closing_history:
+                closer = db.session.get(User, h.user_id)
+                closing_history[h.ticket_id] = closer.full_name if closer else ""
+
         # Construir CSV inteiramente em memória para evitar perda de contexto SQLAlchemy
         output = StringIO()
         writer = csv.writer(output, delimiter=';')
 
         writer.writerow([
             "ID", "Titulo", "Area", "Linha", "Defeito",
-            "Prioridade", "Status", "Criado Em", "Fechado Em",
-            "Tempo de Atendimento (HH:MM:SS)", "Solucao", "Criado Por"
+            "Prioridade", "Status",
+            "Criado Em", "Fechado Em",
+            "Tempo de Atendimento (HH:MM:SS)", "Tempo de Atendimento (horas decimais)",
+            "Solucao Categoria", "Solucao Descricao",
+            "Criado Por", "Fechado Por"
         ])
 
         for t in tickets:
@@ -205,14 +215,29 @@ def reports():
             creator = db.session.get(User, t.created_by)
             creator_name = creator.full_name if creator else ""
 
-            tempo = ""
+            fechado_por = closing_history.get(t.id, "")
+
+            # Tempo de atendimento: HH:MM:SS e decimal em horas
+            tempo_hhmmss = ""
+            tempo_decimal = ""
             if t.closed_at and t.created_at:
                 diff = t.closed_at - t.created_at
                 total_seconds = int(diff.total_seconds())
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
                 seconds = total_seconds % 60
-                tempo = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                tempo_hhmmss = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                # Decimal com 2 casas, usando vírgula para Excel brasileiro
+                tempo_decimal = f"{total_seconds / 3600:.2f}".replace(".", ",")
+
+            # Separar solução em categoria e descrição
+            # Formato salvo: "CATEGORIA - descrição texto" ou "CATEGORIA" (sem descrição)
+            solucao_categoria = ""
+            solucao_descricao = ""
+            if t.solution:
+                partes = t.solution.split(" - ", 1)
+                solucao_categoria = partes[0].strip()
+                solucao_descricao = partes[1].strip() if len(partes) > 1 else ""
 
             writer.writerow([
                 t.id,
@@ -224,9 +249,12 @@ def reports():
                 t.status,
                 t.created_at.strftime("%d/%m/%Y %H:%M:%S") if t.created_at else "",
                 t.closed_at.strftime("%d/%m/%Y %H:%M:%S") if t.closed_at else "",
-                tempo,
-                t.solution or "",
-                creator_name
+                tempo_hhmmss,
+                tempo_decimal,
+                solucao_categoria,
+                solucao_descricao,
+                creator_name,
+                fechado_por
             ])
 
         csv_content = "\ufeff" + output.getvalue()  # BOM para Excel reconhecer UTF-8
