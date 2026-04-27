@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, flash, Response
+from flask import render_template, redirect, url_for, request, flash, Response, jsonify, make_response
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 import csv
@@ -6,6 +6,15 @@ from io import StringIO
 from app import db
 from app.main import main
 from app.models import User, Ticket, TicketHistory, DefectCategory, SolutionCategory
+
+@main.route("/api/tickets/count")
+@login_required
+def api_tickets_count():
+    """Endpoint leve para polling. expire_all garante dado fresco do banco."""
+    db.session.expire_all()
+    total = db.session.execute(db.select(db.func.count()).select_from(Ticket)).scalar()
+    return jsonify({"total": total})
+
 
 @main.route("/")
 def index():
@@ -67,15 +76,20 @@ def tickets():
     progress_tickets = Ticket.query.filter_by(status="Em atendimento").count()
     closed_tickets = Ticket.query.filter_by(status="Fechado").count()
     
-    return render_template(
-        "tickets.html", 
-        tickets=tickets_pagination.items, 
+    response = make_response(render_template(
+        "tickets.html",
+        tickets=tickets_pagination.items,
         pagination=tickets_pagination,
         total_tickets=total_tickets,
         open_tickets=open_tickets,
         progress_tickets=progress_tickets,
         closed_tickets=closed_tickets
-    )
+    ))
+    # Impede que o browser sirva esta página do cache no auto-reload
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 @main.route("/tickets/new", methods=["GET", "POST"])
 @login_required

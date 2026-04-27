@@ -20,7 +20,7 @@
         <div class="card shadow-sm border-0 bg-primary text-white">
             <div class="card-body">
                 <h6>Total</h6>
-                <h2>{{ total_tickets }}</h2>
+                <h2 id="stat-total">{{ total_tickets }}</h2>
             </div>
         </div>
     </div>
@@ -262,6 +262,63 @@
 
     setInterval(updateElapsedTimes, 1000);
     updateElapsedTimes();
+
+    // --- Auto-refresh: detecta novo chamado comparando API vs DOM ---
+    // Lemos sempre do DOM para evitar corrompimento de variável entre reloads.
+    let reloading = false;
+
+    function getPageCount() {
+        const el = document.getElementById("stat-total");
+        return el ? parseInt(el.textContent.trim(), 10) : 0;
+    }
+
+    async function pollTicketCount() {
+        if (reloading) return;
+        try {
+            const res = await fetch("{{ url_for('main.api_tickets_count') }}", {
+                credentials: "same-origin",
+                cache: "no-store"
+            });
+            if (!res.ok) return;
+            
+            const data = await res.json();
+            const pageCount = getPageCount();
+
+            if (data.total !== pageCount) {
+                reloading = true;
+                const banner = document.getElementById("new-ticket-banner");
+                if (banner) banner.classList.remove("d-none");
+                setTimeout(() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("_t", Date.now());
+                    window.location.replace(url.toString());
+                }, 2000);
+            }
+        } catch (e) {
+            // Silencioso em produção
+        }
+    }
+
+
+    setInterval(pollTicketCount, 10000);
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            pollTicketCount();
+        }
+    });
+
 </script>
+
+<!-- Banner de notificação de novo chamado -->
+<div id="new-ticket-banner"
+     class="d-none position-fixed bottom-0 end-0 m-4 alert alert-success shadow-lg d-flex align-items-center gap-3"
+     style="z-index: 9999; border-radius: 12px; min-width: 280px;">
+    <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+    <div>
+        <strong>Novo chamado detectado!</strong><br>
+        <small class="text-muted">Atualizando a lista...</small>
+    </div>
+</div>
 
 {% endblock %}
