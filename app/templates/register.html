@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Criar Conta - Helpdesk Engenharia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
@@ -22,11 +22,13 @@
 
     <div class="container d-flex justify-content-center">
         <div class="login-card wide">
-            
+
             <div class="login-header pb-0">
                 <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                 </div>
                 <h3>Criar Conta</h3>
@@ -45,32 +47,37 @@
                 {% endwith %}
 
                 <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-6 form-floating">
-                            <input type="text" name="first_name" class="form-control" id="firstNameInput" placeholder="Nome" required>
+                            <input type="text" name="first_name" class="form-control" id="firstNameInput"
+                                placeholder="Nome" required>
                             <label for="firstNameInput" class="ms-1">Nome</label>
                         </div>
 
                         <div class="col-md-6 form-floating">
-                            <input type="text" name="last_name" class="form-control" id="lastNameInput" placeholder="Sobrenome" required>
+                            <input type="text" name="last_name" class="form-control" id="lastNameInput"
+                                placeholder="Sobrenome" required>
                             <label for="lastNameInput" class="ms-1">Sobrenome</label>
                         </div>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="email" name="email" class="form-control" id="emailInput" placeholder="name@example.com" required>
-                        <label for="emailInput">E-mail corporativo (@empresa ou @digiboard)</label>
+                        <input type="email" name="email" class="form-control" id="emailInput"
+                            placeholder="name@example.com" required>
+                        <label for="emailInput">E-mail digiboard</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="password" name="password" class="form-control" id="passwordInput" placeholder="Senha" required>
+                        <input type="password" name="password" class="form-control" id="passwordInput"
+                            placeholder="Senha" required>
                         <label for="passwordInput">Criar senha</label>
                     </div>
 
                     <div class="form-floating mb-4">
-                        <input type="password" name="confirm_password" class="form-control" id="confirmPasswordInput" placeholder="Confirmar Senha" required>
+                        <input type="password" name="confirm_password" class="form-control" id="confirmPasswordInput"
+                            placeholder="Confirmar Senha" required>
                         <label for="confirmPasswordInput">Confirmar senha</label>
                     </div>
 
@@ -78,7 +85,8 @@
                         Finalizar Cadastro
                     </button>
 
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline w-100 d-block text-center text-decoration-none">
+                    <a href="{{ url_for('auth.login') }}"
+                        class="btn btn-outline w-100 d-block text-center text-decoration-none">
                         Voltar para o Login
                     </a>
                 </form>
@@ -108,4 +116,5 @@
     </script>
 
 </body>
+
 </html>

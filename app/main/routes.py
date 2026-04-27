@@ -30,12 +30,57 @@ def dashboard():
     progress_tickets = Ticket.query.filter_by(status="Em atendimento").count()
     closed_tickets = Ticket.query.filter_by(status="Fechado").count()
 
+    # Dados para Gráfico de Categorias
+    categories_data = db.session.query(
+        Ticket.category, db.func.count(Ticket.id)
+    ).group_by(Ticket.category).all()
+    cat_labels = [c[0] for c in categories_data] if categories_data else []
+    cat_values = [c[1] for c in categories_data] if categories_data else []
+
+    # Dados para Gráfico de Prioridades
+    priorities_data = db.session.query(
+        Ticket.priority, db.func.count(Ticket.id)
+    ).group_by(Ticket.priority).all()
+    pri_labels = [p[0] for p in priorities_data] if priorities_data else []
+    pri_values = [p[1] for p in priorities_data] if priorities_data else []
+
+    # Dados para Gráfico de Tendência (Últimos 7 dias)
+    today = datetime.now().date()
+    dates = [(today - timedelta(days=i)) for i in range(6, -1, -1)]
+    trend_labels = [d.strftime("%d/%m") for d in dates]
+    trend_values = []
+    for d in dates:
+        count = Ticket.query.filter(
+            db.func.date(Ticket.created_at) == d
+        ).count()
+        trend_values.append(count)
+
+    # Cálculo do Tempo Médio de Atendimento (SLA) para chamados fechados
+    avg_hours = 0
+    closed_with_time = Ticket.query.filter(
+        Ticket.status == "Fechado",
+        Ticket.closed_at.isnot(None),
+        Ticket.created_at.isnot(None)
+    ).all()
+    
+    if closed_with_time:
+        total_seconds = sum((t.closed_at - t.created_at).total_seconds() for t in closed_with_time)
+        avg_seconds = total_seconds / len(closed_with_time)
+        avg_hours = avg_seconds / 3600
+
     return render_template(
         "dashboard.html",
         total_tickets=total_tickets,
         open_tickets=open_tickets,
         progress_tickets=progress_tickets,
-        closed_tickets=closed_tickets
+        closed_tickets=closed_tickets,
+        avg_hours=round(avg_hours, 1),
+        cat_labels=cat_labels,
+        cat_values=cat_values,
+        pri_labels=pri_labels,
+        pri_values=pri_values,
+        trend_labels=trend_labels,
+        trend_values=trend_values
     )
 
 @main.route("/tickets")
