@@ -58,31 +58,37 @@
 <form method="GET" action="{{ url_for('main.tickets') }}" class="card shadow-sm mb-4">
     <div class="card-body">
         <div class="row g-2">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input type="text" name="search" class="form-control"
                     placeholder="Buscar título, área, defeito..." value="{{ request.args.get('search', '') }}">
             </div>
             <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">Todas as Áreas</option>
+                    <option value="Engenharia de Teste" {% if request.args.get('category') == 'Engenharia de Teste' %}selected{% endif %}>Engenharia de Teste</option>
+                    <option value="Engenharia SMT" {% if request.args.get('category') == 'Engenharia SMT' %}selected{% endif %}>Engenharia SMT</option>
+                    <option value="Engenharia de Processo" {% if request.args.get('category') == 'Engenharia de Processo' %}selected{% endif %}>Engenharia de Processo</option>
+                </select>
+            </div>
+            <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">Todos Status</option>
                     <option value="Aberto" {% if request.args.get('status') == 'Aberto' %}selected{% endif %}>Aberto</option>
                     <option value="Fechado" {% if request.args.get('status') == 'Fechado' %}selected{% endif %}>Fechado</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <select name="priority" class="form-select">
-                    <option value="">Todas Prioridades</option>
+                    <option value="">Prioridades</option>
                     <option value="Baixa" {% if request.args.get('priority') == 'Baixa' %}selected{% endif %}>Baixa</option>
                     <option value="Média" {% if request.args.get('priority') == 'Média' %}selected{% endif %}>Média</option>
                     <option value="Alta" {% if request.args.get('priority') == 'Alta' %}selected{% endif %}>Alta</option>
                     <option value="Crítica" {% if request.args.get('priority') == 'Crítica' %}selected{% endif %}>Crítica</option>
                 </select>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-            </div>
-            <div class="col-md-1">
-                <a href="{{ url_for('main.tickets') }}" class="btn btn-secondary w-100">Limpar</a>
+                <a href="{{ url_for('main.tickets') }}" class="btn btn-outline-secondary w-100">Limpar</a>
             </div>
         </div>
     </div>
@@ -202,13 +208,13 @@
 <nav aria-label="Navegação de páginas" class="mt-4">
     <ul class="pagination justify-content-center">
         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.prev_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) if pagination.has_prev else '#' }}">Anterior</a>
+            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.prev_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority'), category=request.args.get('category')) if pagination.has_prev else '#' }}">Anterior</a>
         </li>
         
         {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
             {% if page_num %}
                 <li class="page-item {% if pagination.page == page_num %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('main.tickets', page=page_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) }}">{{ page_num }}</a>
+                    <a class="page-link" href="{{ url_for('main.tickets', page=page_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority'), category=request.args.get('category')) }}">{{ page_num }}</a>
                 </li>
             {% else %}
                 <li class="page-item disabled"><span class="page-link">...</span></li>
@@ -216,7 +222,7 @@
         {% endfor %}
         
         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.next_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority')) if pagination.has_next else '#' }}">Próxima</a>
+            <a class="page-link" href="{{ url_for('main.tickets', page=pagination.next_num, search=request.args.get('search'), status=request.args.get('status'), priority=request.args.get('priority'), category=request.args.get('category')) if pagination.has_next else '#' }}">Próxima</a>
         </li>
     </ul>
 </nav>

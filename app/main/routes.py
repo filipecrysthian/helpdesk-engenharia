@@ -1,6 +1,8 @@
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, Response
 from flask_login import login_required, current_user
-from datetime import datetime
+from datetime import datetime, timedelta
+import csv
+from io import StringIO
 from app import db
 from app.main import main
 from app.models import User, Ticket, TicketHistory, DefectCategory, SolutionCategory
@@ -34,6 +36,7 @@ def tickets():
     search = request.args.get('search', '').strip()
     status_filter = request.args.get('status', '').strip()
     priority_filter = request.args.get('priority', '').strip()
+    category_filter = request.args.get('category', '').strip()
 
     query = Ticket.query
 
@@ -53,6 +56,9 @@ def tickets():
 
     if priority_filter:
         query = query.filter(Ticket.priority == priority_filter)
+
+    if category_filter:
+        query = query.filter(Ticket.category == category_filter)
 
     tickets_pagination = query.order_by(Ticket.created_at.desc()).paginate(page=page, per_page=15)
     
@@ -146,3 +152,93 @@ def ticket_detail(ticket_id):
         histories=histories,
         solution_categories=solution_categories
     )
+
+@main.route("/reports", methods=["GET"])
+@login_required
+def reports():
+    if current_user.role not in ["admin", "gestor"]:
+        flash("Acesso negado. Apenas gestores e administradores podem acessar os relatórios.", "danger")
+        return redirect(url_for("main.dashboard"))
+
+    export = request.args.get("export")
+    if export == "csv":
+        data_inicial = request.args.get("data_inicial")
+        data_final = request.args.get("data_final")
+        area = request.args.get("area")
+
+        query = Ticket.query
+
+        if data_inicial:
+            try:
+                date_obj = datetime.strptime(data_inicial, "%Y-%m-%d")
+                query = query.filter(Ticket.created_at >= date_obj)
+            except ValueError:
+                pass
+
+        if data_final:
+            try:
+                date_obj = datetime.strptime(data_final, "%Y-%m-%d")
+                query = query.filter(Ticket.created_at < date_obj + timedelta(days=1))
+            except ValueError:
+                pass
+
+        if area:
+            query = query.filter(Ticket.category == area)
+
+        tickets = query.order_by(Ticket.created_at.desc()).all()
+
+        # Construir CSV inteiramente em memória para evitar perda de contexto SQLAlchemy
+        output = StringIO()
+        writer = csv.writer(output, delimiter=';')
+
+        writer.writerow([
+            "ID", "Titulo", "Area", "Linha", "Defeito",
+            "Prioridade", "Status", "Criado Em", "Fechado Em",
+            "Tempo de Atendimento (HH:MM:SS)", "Solucao", "Criado Por"
+        ])
+
+        for t in tickets:
+            defect_desc = ""
+            if t.defect_category:
+                defect_desc = f"{t.defect_category.code} - {t.defect_category.description}"
+
+            creator = db.session.get(User, t.created_by)
+            creator_name = creator.full_name if creator else ""
+
+            tempo = ""
+            if t.closed_at and t.created_at:
+                diff = t.closed_at - t.created_at
+                total_seconds = int(diff.total_seconds())
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                seconds = total_seconds % 60
+                tempo = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+            writer.writerow([
+                t.id,
+                t.title,
+                t.category,
+                t.station or "",
+                defect_desc,
+                t.priority,
+                t.status,
+                t.created_at.strftime("%d/%m/%Y %H:%M:%S") if t.created_at else "",
+                t.closed_at.strftime("%d/%m/%Y %H:%M:%S") if t.closed_at else "",
+                tempo,
+                t.solution or "",
+                creator_name
+            ])
+
+        csv_content = "\ufeff" + output.getvalue()  # BOM para Excel reconhecer UTF-8
+        filename = f"relatorio_kpi_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+
+        return Response(
+            csv_content,
+            mimetype="text/csv",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Type": "text/csv; charset=utf-8"
+            }
+        )
+
+    return render_template("reports.html")
