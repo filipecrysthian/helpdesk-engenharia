@@ -124,7 +124,20 @@ def solution_toggle(id):
 @admin.route("/users")
 @login_required
 def users():
-    users = User.query.order_by(User.created_at.desc()).all()
+    search = request.args.get('search', '').strip()
+    query = User.query
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                User.first_name.ilike(f'%{search}%'),
+                User.last_name.ilike(f'%{search}%'),
+                User.email.ilike(f'%{search}%'),
+                User.role.ilike(f'%{search}%')
+            )
+        )
+        
+    users = query.order_by(User.created_at.desc()).all()
     return render_template("admin_users.html", users=users)
 
 
