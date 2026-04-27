@@ -60,14 +60,14 @@
 <div class="mt-3">
     <a href="{{ url_for('main.tickets') }}" class="btn btn-secondary">Voltar</a>
 
-    {% if ticket.status == "Aberto" %}
+    {% if ticket.status == "Aberto" and current_user.role != "solicitante" %}
     <button class="btn btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#solutionBox">
         Solução
     </button>
     {% endif %}
 </div>
 
-{% if ticket.status == "Aberto" %}
+{% if ticket.status == "Aberto" and current_user.role != "solicitante" %}
 <div class="collapse mt-3" id="solutionBox">
 
     <div class="card shadow-sm">

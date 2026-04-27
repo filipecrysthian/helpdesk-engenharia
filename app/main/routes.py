@@ -102,6 +102,10 @@ def ticket_detail(ticket_id):
     creator = db.session.get(User, ticket.created_by)
 
     if request.method == "POST":
+        if current_user.role == "solicitante":
+            flash("Você não tem permissão para fechar chamados.", "danger")
+            return redirect(url_for("main.ticket_detail", ticket_id=ticket.id))
+
         solution_category = request.form.get("solution_category")
         solution_text = request.form.get("solution", "").strip()
 
