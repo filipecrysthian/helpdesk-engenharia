@@ -2,49 +2,56 @@
 
 {% block content %}
 
-<h3>Dashboard</h3>
-
-<div class="row mt-4">
-    <div class="col-md-3">
-        <div class="card text-bg-primary shadow">
-            <div class="card-body">
-                <h5>Total</h5>
-                <h2>{{ total_tickets }}</h2>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0 fw-bold">Dashboard</h2>
+        <small class="text-muted">Visão geral do sistema de Helpdesk</small>
     </div>
 
-    <div class="col-md-3">
-        <div class="card text-bg-warning shadow">
-            <div class="card-body">
-                <h5>Abertos</h5>
-                <h2>{{ open_tickets }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card text-bg-info shadow">
-            <div class="card-body">
-                <h5>Em atendimento</h5>
-                <h2>{{ progress_tickets }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card text-bg-success shadow">
-            <div class="card-body">
-                <h5>Fechados</h5>
-                <h2>{{ closed_tickets }}</h2>
-            </div>
-        </div>
+    <div>
+        <a href="{{ url_for('main.tickets') }}" class="btn btn-outline-secondary me-2">Ver Chamados</a>
+        <a href="{{ url_for('main.ticket_new') }}" class="btn btn-success">
+            + Novo Chamado
+        </a>
     </div>
 </div>
 
-<div class="mt-4">
-    <a href="{{ url_for('main.ticket_new') }}" class="btn btn-success">Novo Chamado</a>
-    <a href="{{ url_for('main.tickets') }}" class="btn btn-secondary">Ver Chamados</a>
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-primary text-white">
+            <div class="card-body">
+                <h6>Total</h6>
+                <h2 class="mb-0">{{ total_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-warning text-white">
+            <div class="card-body">
+                <h6>Abertos</h6>
+                <h2 class="mb-0">{{ open_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-info text-white">
+            <div class="card-body">
+                <h6>Em atendimento</h6>
+                <h2 class="mb-0">{{ progress_tickets }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 bg-success text-white">
+            <div class="card-body">
+                <h6>Fechados</h6>
+                <h2 class="mb-0">{{ closed_tickets }}</h2>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
