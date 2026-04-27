@@ -23,44 +23,87 @@
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg premium-navbar sticky-top">
-        <div class="container-fluid">
+    <!-- NAVBAR SUPERIOR -->
+    <nav class="navbar premium-navbar sticky-top">
+        <div class="container-fluid position-relative d-flex justify-content-between align-items-center">
+            
+            <!-- Esquerda: Botão Sanduíche -->
+            <button class="btn btn-outline-light border-0 d-flex align-items-center p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-label="Abrir Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </button>
 
-            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+            <!-- Centro: Logo Centralizada -->
+            <a class="navbar-brand position-absolute start-50 translate-middle-x m-0" href="{{ url_for('main.dashboard') }}">
                 Helpdesk Engenharia
             </a>
 
-            {% if current_user.is_authenticated %}
-            <div class="d-flex align-items-center navbar-actions">
-
-                {% if current_user.role == "admin" %}
-                <a href="{{ url_for('admin.users') }}" class="btn btn-outline-info btn-sm me-2">
-                    Usuários
-                </a>
-
-                <a href="{{ url_for('admin.defects') }}" class="btn btn-outline-warning btn-sm me-2">
-                    Defeitos
-                </a>
-
-                <a href="{{ url_for('admin.solutions') }}" class="btn btn-outline-success btn-sm me-2">
-                    Soluções
-                </a>
-                {% endif %}
-
-                <span class="navbar-text text-white me-3">
-                    {{ current_user.name }} | {{ current_user.role }}
-                </span>
-
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
+            <!-- Direita: Botão Sair -->
+            <div class="navbar-actions">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm px-3">
                     Sair
                 </a>
-
+                {% else %}
+                <div style="width: 50px;"></div>
+                {% endif %}
             </div>
-            {% endif %}
 
         </div>
     </nav>
+
+    <!-- SIDEBAR (Offcanvas) -->
+    <div class="offcanvas offcanvas-start sidebar-glass text-white" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title fw-bold" id="sidebarMenuLabel">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            
+            {% if current_user.is_authenticated %}
+            <div class="mb-4 bg-dark bg-opacity-25 p-3 rounded">
+                <small class="text-white-50 d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">Operador logado</small>
+                <strong class="d-block mb-1">{{ current_user.full_name }}</strong>
+                <span class="badge bg-secondary">{{ current_user.role }}</span>
+            </div>
+
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{{ url_for('main.dashboard') }}" class="nav-link text-white btn text-start">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('main.tickets') }}" class="nav-link text-white btn text-start">
+                        Meus Chamados
+                    </a>
+                </li>
+                
+                {% if current_user.role == "admin" %}
+                <hr class="border-secondary my-3">
+                <small class="text-white-50 d-block text-uppercase mb-2 px-3" style="font-size: 0.7rem; letter-spacing: 1px;">Administração</small>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.users') }}" class="nav-link text-info btn text-start">
+                        <span class="fw-bold">›</span> Usuários
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.defects') }}" class="nav-link text-warning btn text-start">
+                        <span class="fw-bold">›</span> Categorias Defeitos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.solutions') }}" class="nav-link text-success btn text-start">
+                        <span class="fw-bold">›</span> Categorias Soluções
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            {% endif %}
+
+        </div>
+    </div>
 
     <!-- CONTAINER -->
     <div class="container mt-4">
