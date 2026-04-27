@@ -162,6 +162,11 @@
                     }
                 });
             });
+
+            // Auto-hide alerts after 10 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 10000);
         });
     </script>
 

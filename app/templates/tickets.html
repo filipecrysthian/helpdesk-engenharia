@@ -57,12 +57,14 @@
 <!-- FILTROS -->
 <form method="GET" action="{{ url_for('main.tickets') }}" class="card shadow-sm mb-4">
     <div class="card-body">
-        <div class="row g-2">
-            <div class="col-md-3">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-bold text-muted">Busca</label>
                 <input type="text" name="search" class="form-control"
-                    placeholder="Buscar título, área, defeito..." value="{{ request.args.get('search', '') }}">
+                    placeholder="Título, área, defeito..." value="{{ request.args.get('search', '') }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small fw-bold text-muted">Área</label>
                 <select name="category" class="form-select">
                     <option value="">Todas as Áreas</option>
                     <option value="Engenharia de Teste" {% if request.args.get('category') == 'Engenharia de Teste' %}selected{% endif %}>Engenharia de Teste</option>
@@ -70,14 +72,16 @@
                     <option value="Engenharia de Processo" {% if request.args.get('category') == 'Engenharia de Processo' %}selected{% endif %}>Engenharia de Processo</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-bold text-muted">Status</label>
                 <select name="status" class="form-select">
                     <option value="">Todos Status</option>
                     <option value="Aberto" {% if request.args.get('status') == 'Aberto' %}selected{% endif %}>Aberto</option>
                     <option value="Fechado" {% if request.args.get('status') == 'Fechado' %}selected{% endif %}>Fechado</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-bold text-muted">Prioridade</label>
                 <select name="priority" class="form-select">
                     <option value="">Prioridades</option>
                     <option value="Baixa" {% if request.args.get('priority') == 'Baixa' %}selected{% endif %}>Baixa</option>
@@ -86,9 +90,11 @@
                     <option value="Crítica" {% if request.args.get('priority') == 'Crítica' %}selected{% endif %}>Crítica</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                <a href="{{ url_for('main.tickets') }}" class="btn btn-outline-secondary w-100">Limpar</a>
+            <div class="col-lg-3 col-md-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+                    <a href="{{ url_for('main.tickets') }}" class="btn btn-outline-secondary flex-fill text-nowrap">Limpar</a>
+                </div>
             </div>
         </div>
     </div>
