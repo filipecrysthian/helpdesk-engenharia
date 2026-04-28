@@ -15,14 +15,35 @@ def restrict_admin():
 @login_required
 def defects():
     if request.method == "POST":
-        code = request.form.get("code").strip().upper()
         description = request.form.get("description").strip().upper()
         area = request.form.get("area")
+
+        if area == "Engenharia de Teste":
+            prefix = "TST"
+        elif area == "Engenharia SMT":
+            prefix = "SMT"
+        elif area == "Engenharia de Processo":
+            prefix = "PRC"
+        else:
+            prefix = "DEF"
+
+        import re
+        defects_with_prefix = DefectCategory.query.filter(DefectCategory.code.like(f"{prefix}%")).all()
+        max_num = 0
+        for d in defects_with_prefix:
+            match = re.search(r'\d+', d.code)
+            if match:
+                num = int(match.group())
+                if num > max_num:
+                    max_num = num
+
+        new_num = max_num + 1
+        code = f"{prefix}{new_num:03d}"
 
         exists = DefectCategory.query.filter_by(code=code).first()
 
         if exists:
-            flash("Já existe uma categoria com esse código.", "danger")
+            flash(f"Erro ao gerar código {code}. Já existe.", "danger")
         else:
             defect = DefectCategory(
                 code=code,

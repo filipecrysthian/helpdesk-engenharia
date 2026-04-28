@@ -13,17 +13,6 @@
 
             <div class="row">
 
-                <div class="col-md-3 mb-3">
-                    <label class="form-label">Código</label>
-                    <input type="text" name="code" class="form-control" placeholder="Ex: TST003" required>
-                </div>
-
-                <div class="col-md-5 mb-3">
-                    <label class="form-label">Descrição</label>
-                    <input type="text" name="description" class="form-control" placeholder="Ex: FALHA NO TESTE DE USB"
-                        required>
-                </div>
-
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Área Engenharia</label>
                     <select name="area" class="form-select" required>
@@ -32,6 +21,12 @@
                         <option>Engenharia SMT</option>
                         <option>Engenharia de Processo</option>
                     </select>
+                </div>
+
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="description" class="form-control" placeholder="Ex: FALHA NO TESTE DE USB"
+                        required>
                 </div>
 
             </div>
@@ -71,6 +66,7 @@
 
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Código</th>
                     <th>Descrição</th>
                     <th>Área</th>
@@ -82,6 +78,7 @@
             <tbody>
                 {% for defect in defects %}
                 <tr>
+                    <td>{{ defect.id }}</td>
                     <td><strong>{{ defect.code }}</strong></td>
                     <td>{{ defect.description }}</td>
                     <td>{{ defect.area }}</td>

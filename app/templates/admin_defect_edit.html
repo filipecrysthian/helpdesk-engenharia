@@ -12,12 +12,17 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             <div class="row">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">ID</label>
+                    <input type="text" class="form-control" value="{{ defect.id }}" readonly>
+                </div>
+
+                <div class="col-md-2 mb-3">
                     <label class="form-label">Código</label>
                     <input type="text" name="code" class="form-control" value="{{ defect.code }}" required>
                 </div>
 
-                <div class="col-md-5 mb-3">
+                <div class="col-md-4 mb-3">
                     <label class="form-label">Descrição</label>
                     <input type="text" name="description" class="form-control" value="{{ defect.description }}" required>
                 </div>
