@@ -118,7 +118,9 @@
                     <th>Data</th>
                     <th>Hora Abertura</th>
                     <th>Hora Fechamento</th>
+                    {% if current_user.role != 'solicitante' %}
                     <th>Tempo Aberto</th>
+                    {% endif %}
                     <th>Ação</th>
                 </tr>
             </thead>
@@ -178,6 +180,7 @@
                         {% endif %}
                     </td>
 
+                    {% if current_user.role != 'solicitante' %}
                     <td>
                         {% if ticket.closed_at %}
                         {% set diff = ticket.closed_at - ticket.created_at %}
@@ -193,6 +196,7 @@
                         </span>
                         {% endif %}
                     </td>
+                    {% endif %}
 
                     <td>
                         <a href="{{ url_for('main.ticket_detail', ticket_id=ticket.id) }}" class="btn btn-sm btn-primary">
