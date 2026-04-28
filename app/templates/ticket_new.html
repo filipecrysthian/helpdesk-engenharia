@@ -5,7 +5,7 @@
 <h3>Novo Chamado</h3>
 
 <form method="POST" class="mt-4">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
     <div class="mb-3">
         <label class="form-label">Título <span class="text-danger">*</span></label>
@@ -59,8 +59,11 @@
 
                 <option value="SMT5" data-type="SMT">SMT5</option>
                 <option value="SMT12" data-type="SMT">SMT12</option>
+                <option value="SMT13" data-type="SMT">SMT13</option>
                 <option value="SMT14" data-type="SMT">SMT14</option>
+                <option value="SMT15" data-type="SMT">SMT15</option>
                 <option value="SMT16" data-type="SMT">SMT16</option>
+                <option value="SMT17" data-type="SMT">SMT17</option>
                 <option value="SMT18" data-type="SMT">SMT18</option>
 
                 <option value="IMC2" data-type="IMC">IMC2</option>
@@ -142,7 +145,7 @@
                     lineSelect.append(option.clone());
                 }
 
-                if (selectedArea === "Engenharia SMT" && lineType === "SMT") {
+                if (selectedArea === "Engenharia SMT" && (lineType === "SMT" || lineType === "IMC")) {
                     lineSelect.append(option.clone());
                 }
 
